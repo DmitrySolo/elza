@@ -44,20 +44,15 @@ Route::group(['middleware' => ['web']], function () {
 
     Route::get('/doc/{number}/','PageBuilderController@docInfo');
     Route::post('/task','AjaxFormController@getFullTaskById');
-    Route::get('/task','AjaxFormController@getFullTaskById');
     Route::post('/return','PageBuilderController@returnInfo');
-    Route::get('/ajax/doc/{number}/','AjaxFormController@docInfoAjax');
     Route::post('/ajax/addProblemTask','AjaxFormController@addGoodsProblemTask');
-    Route::get('/ajax/addProblemTask','AjaxFormController@addGoodsProblemTask');
     Route::post('/ajax/getfortask','AjaxFormController@getWithClientByID');
-    Route::get('/ajax/getfortask','AjaxFormController@getWithClientByID');
     Route::post('/ajax/getcdek','AjaxFormController@CDEK');
     Route::post('/ajax/bitrixlist','AjaxFormController@getBitrixList');
     Route::post('/ajax/pvzlist','AjaxFormController@getPVZList');
     Route::get('/pvzlist/{cityID}/','AjaxFormController@getPVZList');
     Route::post('/ajax/getforbitrix','AjaxFormController@getBitrix');
     Route::post('/ajax/delayTask','AjaxFormController@delayTask');
-    Route::get('/ajax/delayTask','AjaxFormController@delayTask');
     Route::get('/ajax/getforbitrix','AjaxFormController@getBitrix');
     Route::get('/bishtrix','BitrixController@getNewO');
     Route::get('/docupd','DocumentController@import');
