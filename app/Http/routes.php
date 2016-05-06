@@ -71,6 +71,5 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/bitrix','PageBuilderController@getBitrixList');
     Route::post('/ajax/changeTaskStatus','AjaxFormController@changeTaskStatus');
     Route::post('/ajax/DoneTask','AjaxFormController@completeTask');
-    Route::get('/ajax/DoneTask','AjaxFormController@completeTask');
 });
 
