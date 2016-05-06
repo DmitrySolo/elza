@@ -37,7 +37,7 @@
 
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist">
-                <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Отложить задачу</a></li>
+                <!--<li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Отложить задачу</a></li>-->
                 <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Перевести статус</a></li>
                 <li role="presentation"><a href="#messages" aria-controls="messages" role="tab" data-toggle="tab">Завершить задачу</a></li>
             </ul>
