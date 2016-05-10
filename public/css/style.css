@@ -101,3 +101,6 @@ body >.container-fluid {
 .cdek-form .cdek-group input.long{
     width: 240%;
 }
+.tab-content {
+    background-color: antiquewhite;
+}
