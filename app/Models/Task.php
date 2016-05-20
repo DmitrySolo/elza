@@ -65,9 +65,9 @@ class Task extends Model
             ->get();
     }
     public function reviewBitrix($arOrders){
-        $ot=new OrderTask();
+        $ot = new OrderTask();
         foreach($arOrders as $order){
-            $arrp=array();
+            $arrp = array();
             $arrp['order_id']=$order['order_id'];
             $arrp['desc']=$order['status'];
             $arrp['phone']=$order['phone'];
@@ -143,7 +143,7 @@ class Task extends Model
                 "step_description"=>$arr['status'],
             ]);
         $this->where('id',$arr['task_id'])
-            ->update(array('is_complete' => 'Y')
+            ->update(array('is_complete' => 'Y' )
             );
 
     }
