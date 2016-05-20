@@ -43,7 +43,7 @@
     <script src="/jquery-ui/jquery-ui.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/script.js"></script>
-    <script src="jquery.tablesorter.js"></script>
+    <script src="jquery.tablesorter.min.js"></script>
     <script src="/js/bootstrap-validator-master/js/validator.js"></script>
     <script src="/js/validatorBySOL.js"></script>
     <footer class="footer navbar-fixed-bottom row-fluid"><?php echo $footer; ?></footer>
