@@ -68,7 +68,6 @@ class Task extends Model
         $ot = new OrderTask();
         foreach($arOrders as $order){
             $arrp=array();
-            $arrp['site']=$order['site'];
             $arrp['order_id']=$order['order_id'];
             $arrp['desc']=$order['status'];
             $arrp['phone']=$order['phone'];
