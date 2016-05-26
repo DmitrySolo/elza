@@ -19,7 +19,7 @@
             <td><?=$order["ACCOUNT_NUMBER"]?></td>
             <td><?=$order["USER_NAME"]?> <?=$order["USER_LAST_NAME"]?></td>
             <td><?=$order["STATUS_NAME"]?> <?=$order["STATUS_DESCRIPTION"]?></td>
-            <td><button class="btn btn-sm btn-primary BitrixModal" data-toggle="modal" data-target="#BitrixModal" id="allAboutBitrix" href="#allAboutBitrix" data-number="<?=$order["ACCOUNT_NUMBER"]?>">Подробнее</button></td>
+            <td><button class="btn btn-sm btn-primary BitrixModal" data-toggle="modal" data-target="#BitrixModal" id="allAboutBitrix" href="#allAboutBitrix" data-number="<?=$order["ACCOUNT_NUMBER"]?>" data-site="<?=$order["SITE"]?>">Подробнее</button></td>
         </tr>
     <?php endforeach;?>
 </table>
