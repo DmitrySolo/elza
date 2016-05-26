@@ -218,7 +218,7 @@ class AjaxFormController extends Controller
         return view('child.bitrixList',['data'=>$list]);
     }
     public function getBitrix(Request $request,BitrixController $bitrixController,Client $client,Document $docu,CDEKController $cdek){
-        $bitrix=$bitrixController->get($request->number);
+        $bitrix=$bitrixController->get($request->number,$request->site);
         $docs=$client->getDocsByPhone($bitrix["PHONE"]);
         return view('ajax.modalBitrix',['bitrix'=>$bitrix,'docs'=>$docs]);
     }
@@ -237,7 +237,7 @@ class AjaxFormController extends Controller
         $status=$request->status;
         if($request->task_type==1){
             $bitrix=new BitrixController();
-            $bitrix->statusSet($request->order_id,$request->status);
+            $bitrix->statusSet($request->order_id,$status,$request->site);
             $st_arr=$bitrix->statusList();
             foreach($st_arr['OPEN'] as $st){
                 if($st['ID']==$request->status){
@@ -261,7 +261,7 @@ class AjaxFormController extends Controller
         $reason=$request->DoneTask;
         if($request->task_type==1){
             $bitrix=new BitrixController();
-            $bitrix->statusSet($request->order_id,$request->DoneTask);
+            $bitrix->statusSet($request->order_id,$request->DoneTask,$request->site);
             $st_arr=$bitrix->statusList();
             foreach($st_arr['CLOSE'] as $st){
                 if($st['ID']==$request->DoneTask){

@@ -133,10 +133,14 @@ $(document).on('submit','#bitrixListForm',
 $(document).on('click','.BitrixModal',
     function(){
         var number=$(this).data('number');
+        var site=$(this).data('site');
         $.ajax({
             method: "POST",
             url: "/ajax/getforbitrix",
-            data: { number: number }
+            data: {
+                number: number,
+                site: site
+            }
         })
         .always(function( html,status,err ) {
             if(status!='success')$( "#BitrixContent" ).html(err);

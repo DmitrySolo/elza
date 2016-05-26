@@ -35,7 +35,7 @@
     @include('modals.problemModal')
     @include('modals.taskModal')
     @include('modals.rdsModal')
-    @include('modals.newCDEKmodal')
+    @include('modals.newCDEKModal')
     @include('modals.bitrixModal')
     @include('modals.taskInfoModal')
 

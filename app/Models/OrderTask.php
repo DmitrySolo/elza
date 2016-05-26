@@ -11,6 +11,7 @@ class OrderTask extends Model
         $order_id=$this->insertGetId(
             [
                 "created_at" => date('Y-m-d H:i:s',time()),
+                "site"=>$arr["site"],
                 "order_id"=>$arr["order_id"],
                 "description"=>$arr["desc"],
                 "phone"=>$arr["phone"],

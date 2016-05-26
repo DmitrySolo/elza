@@ -31,13 +31,13 @@
         <p>Проблема поступила по накладной:  <a class="showALLbyRDS" href="#allAboutRDS" data-rds="<? echo $data->document_id; ?>"><? echo $data->document_id; ?></a></p>
         <?}?>
         <?if(isset($data->order_id)){?>
-            <p>Номер заказа: <a class="BitrixModal" data-toggle="modal" data-target="#BitrixModal" id="allAboutBitrix" href="#allAboutBitrix" data-number="<?php echo $data->order_id ?>"><?php echo $data->order_id ?></a></p>
+            <p>Номер заказа: <a class="BitrixModal" data-toggle="modal" data-target="#BitrixModal" id="allAboutBitrix" href="#allAboutBitrix" data-number="<?php echo $data->order_id ?>" data-site="<?php echo $data->site ?>"><?php echo $data->order_id ?></a></p>
         <?}?>
         <div>
 
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist">
-                <!--<li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Отложить задачу</a></li>-->
+                <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Отложить задачу</a></li>
                 <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Перевести статус</a></li>
                 <li role="presentation"><a href="#messages" aria-controls="messages" role="tab" data-toggle="tab">Завершить задачу</a></li>
             </ul>
@@ -73,6 +73,7 @@
                 </div>
                 <div role="tabpanel" class="tab-pane" id="profile">
                     <form id="changeStatus">
+                        <input type="hidden" value="<?php echo $data->site?>" name="site">
                         <input type="hidden" value="<?php echo $data->step_count?>" name="step_count" required>
                         <input type="hidden" value="<?php echo $data->id?>" name="id" id="taskId" required>
                         <input type="hidden" value="<?php echo $data->waiting ?>" name="waiting" required>
@@ -111,6 +112,7 @@
                 </div>
                 <div role="tabpanel" class="tab-pane" id="messages">
                     <form id="DoneTask">
+                        <input type="hidden" value="<?php echo $data->site?>" name="site">
                         <input type="hidden" value="<?php echo $data->step_count?>" name="step_count" required>
                         <input type="hidden" value="<?php echo $data->id?>" name="id" id="taskId" required>
                         <input type="hidden" value="<?php echo $data->waiting ?>" name="waiting" required>

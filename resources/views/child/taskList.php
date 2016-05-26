@@ -19,4 +19,3 @@
     </tr>
 <?php endforeach;?>
     </table>
-    <iframe src="http://translate.google.com/translate_tts?tl=RU&q=Добрый  День Уважаемые Директора,   как ваше душевное настроение   чем могу быть полезна&output=embed" width="0" height="0" border="0"></iframe>
