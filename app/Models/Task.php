@@ -71,6 +71,7 @@ class Task extends Model
             $arrp['order_id']=$order['order_id'];
             $arrp['desc']=$order['status'];
             $arrp['phone']=$order['phone'];
+            $arrp['site']=$order['site'];
             $arrp['order_date']=$order['order_date'];
             $arrp['step']=$order['status'];
             $arrp['setted_time']=60;
