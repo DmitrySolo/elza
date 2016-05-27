@@ -31,6 +31,7 @@ class Kernel extends ConsoleKernel
             $model=new Task();
             $bitrix=new BitrixController();
             $model->reviewBitrix($bitrix->getNewOrders());
+            $model->reviewBitrix($bitrix->getNewOrders('ove-cfo.ru'));
         })->everyFiveMinutes();
 
         $schedule->call(function () {
