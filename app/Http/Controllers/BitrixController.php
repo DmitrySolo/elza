@@ -64,7 +64,7 @@ class BitrixController extends Controller
     }
     public function getNewO(){
         $model=new Task();
-        //$model->reviewBitrix($this->getNewOrders());
+        $model->reviewBitrix($this->getNewOrders());
         $model->reviewBitrix($this->getNewOrders('ove-cfo.ru'));
     }
     public function statusSet($number,$status,$site='www.santehsmart.ru'){
