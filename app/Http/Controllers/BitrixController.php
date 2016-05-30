@@ -62,10 +62,36 @@ class BitrixController extends Controller
         }
         return $arOrders;
     }
+    public function getLastOrders($site='www.santehsmart.ru'){
+        $task=new Task();
+        $date_begin=date('d.m.Y',time()-(60*60*24));
+        $date_end=date('d.m.Y');
+        $local=$task->getTaskOrders(date('Y-m-d',time()-(60*60*24)));
+        //dd($local);
+        $arParams=array(
+            'action'=>'list',
+            'date_begin'=>$date_begin,
+            'date_end'=>$date_end,
+        );
+        $bitrix=$this->_bitrix_curl($site,$arParams);
+        //if($site!='www.santehsmart.ru')dd($bitrix);
+        $arOrders=array();
+        foreach($bitrix['ORDERS'] as $order){
+            $arOrders[]=[
+                'site'=>$site,
+                'order_id'=>$order['ACCOUNT_NUMBER'],
+                'order_date'=>date('Y-m-d H:i:s',strtotime($order["DATE_INSERT"])),
+                'status'=>$order["STATUS_NAME"],
+                'status_over'=>strstr($order["STATUS_DESCRIPTION"],"[Завершен]")!=false,
+                'phone'=>$order["PHONE"]
+            ];
+        }
+        return ["ORDERS"=>$arOrders,"LOCAL"=>$local];
+    }
     public function getNewO(){
         $model=new Task();
-        $model->reviewBitrix($this->getNewOrders());
-        $model->reviewBitrix($this->getNewOrders('ove-cfo.ru'));
+        $model->reviewBitrix($this->getLastOrders());
+        $model->reviewBitrix($this->getLastOrders('ove-cfo.ru'));
     }
     public function statusSet($number,$status,$site='www.santehsmart.ru'){
         return $this->_bitrix_curl($site,array(
