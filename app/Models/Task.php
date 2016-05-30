@@ -10,10 +10,10 @@ class Task extends Model
 {
     private $taskTypeTaxonomy=[1=>'order_tasks',2=>'',3=>'goods_problems',4=>''];
     private $taskTypePrefix=[1=>'order_task',2=>'',3=>'goods_problem',4=>''];
-    
+
     public function getByID($id,$type){
 
-    return $task=$this->join('task_types', 'tasks.task_type', '=', 'task_types.task_type_id')
+        return $task=$this->join('task_types', 'tasks.task_type', '=', 'task_types.task_type_id')
             ->join( $this->taskTypeTaxonomy[$type], 'tasks.task_content', '=', $this->taskTypeTaxonomy[$type].'.'.$this->taskTypePrefix[$type].'_id')
             ->join('tasks_history', 'task_id', '=', 'tasks.id')
             ->orderBy('step_count', 'desc')
@@ -46,12 +46,12 @@ class Task extends Model
 
         foreach($tasks as $task){
             if($task->task_type==3){
-               // echo $task->task_content;
-               // $maxStep=DB::table('tasks_history')
-               $setTime= DB::table('tasks_history')
-                   ->orderBy('step_count', 'desc')
-                   ->select('time_setted')->where('task_id',$task->id)
-                   ->first();
+                // echo $task->task_content;
+                // $maxStep=DB::table('tasks_history')
+                $setTime= DB::table('tasks_history')
+                    ->orderBy('step_count', 'desc')
+                    ->select('time_setted')->where('task_id',$task->id)
+                    ->first();
                 $task->max_human_minutes=$setTime->time_setted;
 
             }
@@ -101,9 +101,9 @@ class Task extends Model
     }
     public function updateTaskResponsibility($taskId,$userID){
         $this->where('id',$taskId)
-             ->update(array('user_id' => Auth::id(),
-                        'waiting'=>1)
-             );
+            ->update(array('user_id' => Auth::id(),
+                    'waiting'=>1)
+            );
     }
     public function setTaskStep($stepArr,$taskID){
         DB::table('tasks_history')->where('task_id',$taskID)
@@ -130,7 +130,7 @@ class Task extends Model
                 "step_count"=>$arr['step_count']+1,
                 "step_description"=>$arr['status']
             ]);
-        
+
     }
     public function completeTask($arr){
         DB::table('tasks_history')->where('task_id',$arr['task_id'])
