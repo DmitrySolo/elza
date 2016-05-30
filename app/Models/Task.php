@@ -39,6 +39,17 @@ class Task extends Model
         return $id;
     }
 
+    public function getOrderTask($order_id){
+        return $task=$this->join('task_types', 'tasks.task_type', '=', 'task_types.task_type_id')
+            ->join( 'order_tasks', 'tasks.task_content', '=', 'order_tasks'.'.order_task_id')
+            ->join('tasks_history', 'task_id', '=', 'tasks.id')
+            ->orderBy('step_count', 'desc')
+            ->orderBy('history_id', 'desc')
+            ->select('tasks.*', 'task_types.*','order_tasks.*','tasks_history.*')
+            ->where('order_id','=',$order_id)
+            ->get();
+    }
+
     public function reviewTasks(){
         $tasks=$this->join('task_types', 'tasks.task_type', '=', 'task_types.task_type_id')
             ->select('tasks.*', 'task_types.max_human_minutes')->where('tasks.is_complete','!=','Y')
@@ -64,23 +75,40 @@ class Task extends Model
             ->select('tasks.*', 'task_types.task_name')
             ->get();
     }
-    public function reviewBitrix($arOrders){
+    public function reviewBitrix($arParams){
         $ot = new OrderTask();
-        foreach($arOrders as $order){
-            $arrp = array();
-            $arrp['order_id']=$order['order_id'];
-            $arrp['desc']=$order['status'];
-            $arrp['phone']=$order['phone'];
-            $arrp['site']=$order['site'];
-            $arrp['order_date']=$order['order_date'];
-            $arrp['step']=$order['status'];
-            $arrp['setted_time']=60;
-            $order_id = $ot->setOrderTask($arrp);
-            $arr=array();
-            $arr['type']=1;
-            $arr['content']=$order_id;
-            $taskID=$this->setTask($arr);
-            $ot->BeginTaskHistory($arrp,$taskID);
+        foreach ($arParams["ORDERS"] as $order) {
+            if (in_array($order['order_id'], $arParams["LOCAL"])) {
+                $tasks = $this->getOrderTask($order['order_id']);
+                foreach ($tasks as $task) {
+                    if ($order['status'] != $task->step_description) {
+                        $arr = array();
+                        $arr['task_id'] = $task->task_id;
+                        $arr['step_count'] = $task->step_count;
+                        $arr['waiting'] = $task->waiting;
+                        $arr['time_setted'] = $task->time_setted;
+                        $arr['step_reason'] = "Обновление статуса заказа";
+                        $arr['status'] = $order['status'];
+                        if ($order['status_over']) $this->completeTask($arr);
+                        else $this->changeTaskStatus($arr);
+                    }
+                }
+            } else {
+                $arrp = array();
+                $arrp['order_id'] = $order['order_id'];
+                $arrp['desc'] = $order['status'];
+                $arrp['phone'] = $order['phone'];
+                $arrp['site'] = $order['site'];
+                $arrp['order_date'] = $order['order_date'];
+                $arrp['step'] = $order['status'];
+                $arrp['setted_time'] = 60;
+                $order_id = $ot->setOrderTask($arrp);
+                $arr = array();
+                $arr['type'] = 1;
+                $arr['content'] = $order_id;
+                $taskID = $this->setTask($arr);
+                $ot->BeginTaskHistory($arrp, $taskID);
+            }
         }
     }
     public function getTasks(){
