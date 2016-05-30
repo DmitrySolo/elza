@@ -83,6 +83,7 @@ class Task extends Model
                 foreach($tasks as $task) {
                     if($order['status']!=$task->step_description) {
                         $arr = array();
+
                         $arr['task_id'] = $task->task_id;
                         $arr['step_count'] = $task->step_count;
                         $arr['waiting'] = $task->waiting;
