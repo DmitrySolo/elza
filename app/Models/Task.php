@@ -10,10 +10,10 @@ class Task extends Model
 {
     private $taskTypeTaxonomy=[1=>'order_tasks',2=>'',3=>'goods_problems',4=>''];
     private $taskTypePrefix=[1=>'order_task',2=>'',3=>'goods_problem',4=>''];
-    
+
     public function getByID($id,$type){
 
-    return $task=$this->join('task_types', 'tasks.task_type', '=', 'task_types.task_type_id')
+        return $task=$this->join('task_types', 'tasks.task_type', '=', 'task_types.task_type_id')
             ->join( $this->taskTypeTaxonomy[$type], 'tasks.task_content', '=', $this->taskTypeTaxonomy[$type].'.'.$this->taskTypePrefix[$type].'_id')
             ->join('tasks_history', 'task_id', '=', 'tasks.id')
             ->orderBy('step_count', 'desc')
@@ -24,17 +24,6 @@ class Task extends Model
 
     public function scopeID($query,$id){
         $query->where('tasks.id','=',$id);
-    }
-
-    public function getOrderTask($order_id){
-        return $task=$this->join('task_types', 'tasks.task_type', '=', 'task_types.task_type_id')
-            ->join( 'order_tasks', 'tasks.task_content', '=', 'order_tasks'.'.order_task_id')
-            ->join('tasks_history', 'task_id', '=', 'tasks.id')
-            ->orderBy('step_count', 'desc')
-            ->orderBy('history_id', 'desc')
-            ->select('tasks.*', 'task_types.*','order_tasks.*','tasks_history.*')
-            ->where('order_id','=',$order_id)
-            ->get();
     }
     public function setTask($arr){
         $id=$this->insertGetId(
@@ -57,12 +46,12 @@ class Task extends Model
 
         foreach($tasks as $task){
             if($task->task_type==3){
-               // echo $task->task_content;
-               // $maxStep=DB::table('tasks_history')
-               $setTime= DB::table('tasks_history')
-                   ->orderBy('step_count', 'desc')
-                   ->select('time_setted')->where('task_id',$task->id)
-                   ->first();
+                // echo $task->task_content;
+                // $maxStep=DB::table('tasks_history')
+                $setTime= DB::table('tasks_history')
+                    ->orderBy('step_count', 'desc')
+                    ->select('time_setted')->where('task_id',$task->id)
+                    ->first();
                 $task->max_human_minutes=$setTime->time_setted;
 
             }
@@ -75,41 +64,23 @@ class Task extends Model
             ->select('tasks.*', 'task_types.task_name')
             ->get();
     }
-    public function reviewBitrix($arParams){
+    public function reviewBitrix($arOrders){
         $ot = new OrderTask();
-        foreach($arParams["ORDERS"] as $order){
-            if(in_array($order['order_id'],$arParams["LOCAL"])){
-                $tasks=$this->getOrderTask($order['order_id']);
-                foreach($tasks as $task) {
-                    if($order['status']!=$task->step_description) {
-                        $arr = array();
-
-                        $arr['task_id'] = $task->task_id;
-                        $arr['step_count'] = $task->step_count;
-                        $arr['waiting'] = $task->waiting;
-                        $arr['time_setted'] = $task->time_setted;
-                        $arr['step_reason'] = "Обновление статуса заказа";
-                        $arr['status'] = $order['status'];
-                        if ($order['status_over']) $this->completeTask($arr);
-                        else $this->changeTaskStatus($arr);
-                    }
-                }
-            }else{
-                $arrp = array();
-                $arrp['order_id'] = $order['order_id'];
-                $arrp['desc'] = $order['status'];
-                $arrp['phone'] = $order['phone'];
-                $arrp['site'] = $order['site'];
-                $arrp['order_date'] = $order['order_date'];
-                $arrp['step'] = $order['status'];
-                $arrp['setted_time'] = 60;
-                $order_id = $ot->setOrderTask($arrp);
-                $arr = array();
-                $arr['type'] = 1;
-                $arr['content'] = $order_id;
-                $taskID = $this->setTask($arr);
-                $ot->BeginTaskHistory($arrp, $taskID);
-            }
+        foreach($arOrders as $order){
+            $arrp = array();
+            $arrp['order_id']=$order['order_id'];
+            $arrp['desc']=$order['status'];
+            $arrp['phone']=$order['phone'];
+            $arrp['site']=$order['site'];
+            $arrp['order_date']=$order['order_date'];
+            $arrp['step']=$order['status'];
+            $arrp['setted_time']=60;
+            $order_id = $ot->setOrderTask($arrp);
+            $arr=array();
+            $arr['type']=1;
+            $arr['content']=$order_id;
+            $taskID=$this->setTask($arr);
+            $ot->BeginTaskHistory($arrp,$taskID);
         }
     }
     public function getTasks(){
@@ -130,9 +101,9 @@ class Task extends Model
     }
     public function updateTaskResponsibility($taskId,$userID){
         $this->where('id',$taskId)
-             ->update(array('user_id' => Auth::id(),
-                        'waiting'=>1)
-             );
+            ->update(array('user_id' => Auth::id(),
+                    'waiting'=>1)
+            );
     }
     public function setTaskStep($stepArr,$taskID){
         DB::table('tasks_history')->where('task_id',$taskID)
@@ -159,7 +130,7 @@ class Task extends Model
                 "step_count"=>$arr['step_count']+1,
                 "step_description"=>$arr['status']
             ]);
-        
+
     }
     public function completeTask($arr){
         DB::table('tasks_history')->where('task_id',$arr['task_id'])
