@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CSVClient extends Model{
 
-    private $path="//IM/urec2/INOUT/ELZA/clients.csv";
+    private $path="/mnt/.autofs/ressrv/inout/1CPHPSITE/SITEMANAGER/elza_clients.csv";
     private $file;
     private $head;
 
