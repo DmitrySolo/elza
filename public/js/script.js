@@ -132,6 +132,7 @@ $(document).on('submit','#bitrixListForm',
 );
 $(document).on('click','.BitrixModal',
     function(){
+        $( "#BitrixContent" ).html('');
         var number=$(this).data('number');
         var site=$(this).data('site');
         $.ajax({

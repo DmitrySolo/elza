@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CSVDocument extends Model{
 
-    private $path="//IM/urec2/INOUT/ELZA/docs.csv";
+    private $path="/mnt/.autofs/ressrv/inout/1CPHPSITE/SITEMANAGER/elza_docs.csv";
     private $file;
     private $head;
 
