@@ -5,7 +5,6 @@ namespace App\Console;
 use App\Http\Controllers\BitrixController;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use App\Http\Controllers\TaskController;
 use App\Models\Task;
 
 class Kernel extends ConsoleKernel
@@ -30,8 +29,8 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             $model=new Task();
             $bitrix=new BitrixController();
-            $model->reviewBitrix($bitrix->getNewOrders());
-            $model->reviewBitrix($bitrix->getNewOrders('ove-cfo.ru'));
+            $model->reviewBitrix($bitrix->getLastOrders());
+            $model->reviewBitrix($bitrix->getLastOrders('ove-cfo.ru'));
         })->everyFiveMinutes();
 
         $schedule->call(function () {
