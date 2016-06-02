@@ -117,7 +117,7 @@ class Task extends Model
             ->where('tasks.is_complete','!=','Y')
             ->orderBy('priority_index', 'asc')
             ->orderBy('tasks_history.step_count', 'asc')
-            ->select('tasks.*', 'task_types.task_name','tasks_history.step_description')
+            ->select('tasks.*', 'task_types.*','tasks_history.*')
             ->get();
     }
     public function getTaskOrders($begin_date){
