@@ -78,6 +78,7 @@ class Task extends Model
     public function reviewBitrix($arParams){
         $ot = new OrderTask();
         foreach ($arParams["ORDERS"] as $order) {
+            $time_setted=($order['status_id']=='X')?5400:0;
             if (in_array($order['order_id'], $arParams["LOCAL"])) {
                 $task = $this->getOrderTask($order['order_id']);
                 //echo $order['status'], '***', $task->step_description,'<br>';
@@ -86,11 +87,14 @@ class Task extends Model
                     $arr['task_id'] = $task->task_id;
                     $arr['step_count'] = $task->step_count;
                     $arr['waiting'] = $task->waiting;
-                    $arr['time_setted'] = $task->time_setted;
+                    $arr['time_setted'] = $time_setted?$time_setted:$task->time_setted;
                     $arr['step_reason'] = "Обновление статуса заказа";
                     $arr['status'] = $order['status'];
                     if ($order['status_over']) $this->completeTask($arr);
-                    else $this->changeTaskStatus($arr);
+                    else {
+                        $this->updateTaskResponsibility($arr['task_id'],0);
+                        $this->changeTaskStatus($arr);
+                    }
                 }
             } else {
                 $arrp = array();
@@ -100,13 +104,13 @@ class Task extends Model
                 $arrp['site'] = $order['site'];
                 $arrp['order_date'] = $order['order_date'];
                 $arrp['step'] = $order['status'];
-                $arrp['setted_time'] = 60;
+                $arrp['setted_time'] = $time_setted?$time_setted:60;
                 $order_id = $ot->setOrderTask($arrp);
                 $arr = array();
                 $arr['type'] = 1;
                 $arr['content'] = $order_id;
-                $taskID = $this->setTask($arr);
-                $ot->BeginTaskHistory($arrp, $taskID);
+                $task_id = $this->setTask($arr);
+                $ot->BeginTaskHistory($arrp, $task_id);
             }
         }
     }
