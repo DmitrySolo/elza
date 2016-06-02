@@ -55,7 +55,12 @@ class DocumentController extends Controller
         return $arResult;
     }
 
-    public function import(CSVDocument $CSVDocument,CSVClient $CSVClient,Client $client,Document $document,DocProduct $docProduct){
+    public function import(){
+        $CSVDocument=new CSVDocument();
+        $CSVClient=new CSVClient();
+        $client=new Client();
+        $document=new Document();
+        $docProduct=new DocProduct();
         $CSVDocument->open();
         //$i=0;
         while($data=$CSVDocument->getLine()){
