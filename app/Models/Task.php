@@ -47,7 +47,7 @@ class Task extends Model
             ->orderBy('history_id', 'desc')
             ->select('tasks.*', 'task_types.*','order_tasks.*','tasks_history.*')
             ->where('order_id','=',$order_id)
-            ->get();
+            ->first();
     }
 
     public function reviewTasks(){
@@ -79,19 +79,18 @@ class Task extends Model
         $ot = new OrderTask();
         foreach ($arParams["ORDERS"] as $order) {
             if (in_array($order['order_id'], $arParams["LOCAL"])) {
-                $tasks = $this->getOrderTask($order['order_id']);
-                foreach ($tasks as $task) {
-                    if ($order['status'] != $task->step_description) {
-                        $arr = array();
-                        $arr['task_id'] = $task->task_id;
-                        $arr['step_count'] = $task->step_count;
-                        $arr['waiting'] = $task->waiting;
-                        $arr['time_setted'] = $task->time_setted;
-                        $arr['step_reason'] = "Обновление статуса заказа";
-                        $arr['status'] = $order['status'];
-                        if ($order['status_over']) $this->completeTask($arr);
-                        else $this->changeTaskStatus($arr);
-                    }
+                $task = $this->getOrderTask($order['order_id']);
+                //echo $order['status'], '***', $task->step_description,'<br>';
+                if ($order['status'] != $task->step_description) {
+                    $arr = array();
+                    $arr['task_id'] = $task->task_id;
+                    $arr['step_count'] = $task->step_count;
+                    $arr['waiting'] = $task->waiting;
+                    $arr['time_setted'] = $task->time_setted;
+                    $arr['step_reason'] = "Обновление статуса заказа";
+                    $arr['status'] = $order['status'];
+                    if ($order['status_over']) $this->completeTask($arr);
+                    else $this->changeTaskStatus($arr);
                 }
             } else {
                 $arrp = array();
@@ -118,7 +117,7 @@ class Task extends Model
             ->where('tasks.is_complete','!=','Y')
             ->orderBy('priority_index', 'asc')
             ->orderBy('tasks_history.step_count', 'asc')
-            ->select('tasks.*', 'task_types.*','tasks_history.*')
+            ->select('tasks.*', 'task_types.task_name','tasks_history.step_description')
             ->get();
     }
     public function getTaskOrders($begin_date){

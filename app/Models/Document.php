@@ -68,7 +68,7 @@ class Document extends Model
                    if($value)
                     $resList->where($key, $value);
                 }}
-//        dd($resList);
+//      dd($resList);
         if(isset($arrFilter['nameLike']) && !empty($arrFilter['nameLike'])){
            $resList->where('name', 'LIKE', '%'.$arrFilter['nameLike'].'%');
         }
