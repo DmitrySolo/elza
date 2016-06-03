@@ -50,6 +50,14 @@ class Task extends Model
             ->first();
     }
 
+    public function getFirstOrder(){
+        return $task=$this->join( 'order_tasks', 'tasks.task_content', '=', 'order_tasks'.'.order_task_id')
+            ->where('is_complete','=','N')
+            ->where('task_type','=',1)
+            ->select('tasks.*', 'order_tasks.*')
+            ->first();
+    }
+
     public function reviewTasks(){
         $tasks=$this->join('task_types', 'tasks.task_type', '=', 'task_types.task_type_id')
             ->select('tasks.*', 'task_types.max_human_minutes')->where('tasks.is_complete','!=','Y')
@@ -82,7 +90,7 @@ class Task extends Model
             if (in_array($order['order_id'], $arParams["LOCAL"])) {
                 $task = $this->getOrderTask($order['order_id']);
                 //echo $order['status'], '***', $task->step_description,'<br>';
-                if ($order['status'] != $task->step_description) {
+                if ($order['status'] != $task->step_description && $task->is_complete == 'N') {
                     $arr = array();
                     $arr['task_id'] = $task->task_id;
                     $arr['step_count'] = $task->step_count;
@@ -111,13 +119,15 @@ class Task extends Model
             }
             if($order['status_over']){
                 $task = $this->getOrderTask($order['order_id']);
-                $arr = array();
-                $arr['task_id'] = $task->task_id;
-                $arr['step_count'] = $task->step_count;
-                $arr['waiting'] = $task->waiting;
-                $arr['step_reason'] = "Завершение заказа";
-                $arr['status'] = $order['status'];
-                $this->completeTask($arr);
+                if($task->is_complete == 'N') {
+                    $arr = array();
+                    $arr['task_id'] = $task->task_id;
+                    $arr['step_count'] = $task->step_count;
+                    $arr['waiting'] = $task->waiting;
+                    $arr['step_reason'] = "Завершение заказа";
+                    $arr['status'] = $order['status'];
+                    $this->completeTask($arr);
+                }
             }
         }
     }

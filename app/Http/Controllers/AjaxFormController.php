@@ -79,8 +79,9 @@ class AjaxFormController extends Controller
                 'appealHis' => $appealHistoryArr
             ];
             $bitrix=new BitrixController();
-            $statuses=$bitrix->statusList();
-            $taskInfoData = ['data' => $task->getByID($request->id, $request->type), 'statuses' => $statuses,'clientInfo'=>$clientInfo];
+            $task_data=$task->getByID($request->id, $request->type);
+            $statuses=$bitrix->statusList($task_data->site);
+            $taskInfoData = ['data' => $task_data, 'statuses' => $statuses,'clientInfo'=>$clientInfo];
             return view('ajax.taskOrder',$taskInfoData);
         }elseif($request->type==4) {
             $taskInfoData = ['data' => $task->getByID($request->id, $request->type), 'client' => $client, 'allDoc' => $allClientDocs, 'appealHis' => $appealHistoryArr];
@@ -238,7 +239,7 @@ class AjaxFormController extends Controller
         if($request->task_type==1){
             $bitrix=new BitrixController();
             $bitrix->statusSet($request->order_id,$status,$request->site);
-            $st_arr=$bitrix->statusList();
+            $st_arr=$bitrix->statusList($request->site);
             foreach($st_arr['OPEN'] as $st){
                 if($st['ID']==$request->status){
                     $status=$st['NAME'];
@@ -262,7 +263,7 @@ class AjaxFormController extends Controller
         if($request->task_type==1){
             $bitrix=new BitrixController();
             $bitrix->statusSet($request->order_id,$request->DoneTask,$request->site);
-            $st_arr=$bitrix->statusList();
+            $st_arr=$bitrix->statusList($request->site);
             foreach($st_arr['CLOSE'] as $st){
                 if($st['ID']==$request->DoneTask){
                     $reason=$st['NAME'];
