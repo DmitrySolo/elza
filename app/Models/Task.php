@@ -90,11 +90,8 @@ class Task extends Model
                     $arr['time_setted'] = $time_setted?$time_setted:$task->time_setted;
                     $arr['step_reason'] = "Обновление статуса заказа";
                     $arr['status'] = $order['status'];
-                    if ($order['status_over']) $this->completeTask($arr);
-                    else {
-                        $this->updateTaskResponsibility($arr['task_id'],0);
-                        $this->changeTaskStatus($arr);
-                    }
+                    $this->updateTaskResponsibility($arr['task_id'],0);
+                    $this->changeTaskStatus($arr);
                 }
             } else {
                 $arrp = array();
@@ -111,6 +108,16 @@ class Task extends Model
                 $arr['content'] = $order_id;
                 $task_id = $this->setTask($arr);
                 $ot->BeginTaskHistory($arrp, $task_id);
+            }
+            if($order['status_over']){
+                $task = $this->getOrderTask($order['order_id']);
+                $arr = array();
+                $arr['task_id'] = $task->task_id;
+                $arr['step_count'] = $task->step_count;
+                $arr['waiting'] = $task->waiting;
+                $arr['step_reason'] = "Завершение заказа";
+                $arr['status'] = $order['status'];
+                $this->completeTask($arr);
             }
         }
     }
