@@ -116,6 +116,7 @@
                         <input type="hidden" value="<?php echo $data->step_count?>" name="step_count" required>
                         <input type="hidden" value="<?php echo $data->id?>" name="id" id="taskId" required>
                         <input type="hidden" value="<?php echo $data->waiting ?>" name="waiting" required>
+                        <input type="hidden" value="<?php echo $data->task_type ?>" name="task_type" required>
                         <div>
                             <?if($data->task_type==1){?>
                                 <input type="hidden" value="<?php echo $data->order_id ?>" name="order_id" required>
