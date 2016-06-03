@@ -74,6 +74,7 @@ class BitrixController extends Controller
             'date_end'=>$date_end,
         );
         $bitrix=$this->_bitrix_curl($site,$arParams);
+        //dd($bitrix);
         //if($site!='www.santehsmart.ru')dd($bitrix);
         $arOrders=array();
         foreach($bitrix['ORDERS'] as $order){
@@ -82,6 +83,7 @@ class BitrixController extends Controller
                 'order_id'=>$order['ACCOUNT_NUMBER'],
                 'order_date'=>date('Y-m-d H:i:s',strtotime($order["DATE_INSERT"])),
                 'status'=>$order["STATUS_NAME"],
+                'status_id'=>$order["STATUS_ID"],
                 'status_over'=>strstr($order["STATUS_DESCRIPTION"],"[Завершен]")!=false,
                 'phone'=>$order["PHONE"]
             ];
