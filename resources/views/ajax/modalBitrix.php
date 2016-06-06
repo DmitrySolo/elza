@@ -23,6 +23,10 @@
         <td><?=$bitrix["PHONE"]?></td>
     </tr>
     <tr>
+        <td>Город:</td>
+        <td><?=$bitrix["CITY"]?></td>
+    </tr>
+    <tr>
         <td>Статус:</td>
         <td><?=$bitrix["STATUS_NAME"]?></td>
     </tr>
