@@ -65,11 +65,12 @@ class BitrixController extends Controller
     public function getLastOrders($site='www.santehsmart.ru'){
         $task=new Task();
         $first=$task->getFirstOrder();
+        $time_begin=time()-(60*60*24);
         if(isset($first->order_date)&&!empty($first->order_date))
-            $date_begin=date("d.m.Y", strtotime($first->order_date));
-        else $date_begin=date('d.m.Y',time()-(60*60*24));
+            $time_begin=strtotime($first->order_date);
+        $date_begin=date('d.m.Y',$time_begin);
         $date_end=date('d.m.Y');
-        $local=$task->getTaskOrders(date('Y-m-d',time()-(60*60*24)));
+        $local=$task->getTaskOrders(date('Y-m-d',$time_begin));
         //dd($local);
         $arParams=array(
             'action'=>'list',
