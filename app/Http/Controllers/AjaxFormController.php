@@ -92,6 +92,23 @@ class AjaxFormController extends Controller
     public function getWithClientByID( Document $doc,CDEKController $cdek,Request $request){
         $resCdek=$cdek->basicCDEK($request->rds);
         //dd($resCdek);
+        if(isset($resCdek['ERROR_CDEK'])){
+            $resCdek=[
+                "Number" => $request->rds,
+                "DispatchNumber" => "0",
+                "Status" => [
+                    "Date" => "",
+                    "Code" => "0",
+                    "Description" => "Статус отсутствует",
+                    "CityCode" => "0",
+                    "CityName" => ""
+                ],
+                "Reason" => [],
+                "DeliverySum" => "0",
+                "AddedService" => [],
+                "DeliverySumTotal" => 0
+            ];
+        }
         $package=array();
         if(isset($resCdek['Package']) && !empty($resCdek['Package'])){
             foreach ($resCdek['Package'] as $itemq ){
