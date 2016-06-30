@@ -113,9 +113,11 @@ class AjaxFormController extends Controller
         if(isset($resCdek['Package']) && !empty($resCdek['Package'])){
             foreach ($resCdek['Package'] as $itemq ){
                 //dd($itemq);
-                $key=$itemq['Item']['@attributes']['WareKey'];
-                $value=$itemq['Item']['@attributes']['DelivAmount'];
-                $package[$key]=$value;
+                if(isset($itemq['Item'])) {
+                    $key = $itemq['Item']['@attributes']['WareKey'];
+                    $value = $itemq['Item']['@attributes']['DelivAmount'];
+                    $package[$key] = $value;
+                }
             }
         }
         $res=$doc->getWithClientAndGoodsByID($request->rds);
