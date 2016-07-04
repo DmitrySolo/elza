@@ -89,6 +89,7 @@ class BitrixController extends Controller
                 'status'=>$order["STATUS_NAME"],
                 'status_id'=>$order["STATUS_ID"],
                 'status_over'=>strstr($order["STATUS_DESCRIPTION"],"[Завершен]")!=false,
+                'status_middle'=>strstr($order["STATUS_DESCRIPTION"],"[Отложен]")!=false,
                 'phone'=>$order["PHONE"]
             ];
         }
