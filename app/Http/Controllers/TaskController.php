@@ -40,10 +40,17 @@ class TaskController extends Controller {
     }
     public function getTasks(Task $task){
         $resMod=array();
-        $result= $task->getTasks();
-        foreach ($result as $res){
-
-            $resMod[$res['id']]=$res;
+        $result_open=$task->getTasks();
+        $result_middle=$task->getMiddleTasks();
+        $result_complete=$task->getCompleteTasks();
+        foreach ($result_open as $res){
+            $resMod['open'][$res['id']]=$res;
+        }
+        foreach ($result_middle as $res){
+            $resMod['middle'][$res['id']]=$res;
+        }
+        foreach ($result_complete as $res){
+            $resMod['complete'][$res['id']]=$res;
         }
         return $resMod;
     }

@@ -90,7 +90,7 @@ class Task extends Model
             if (in_array($order['order_id'], $arParams["LOCAL"])) {
                 $task = $this->getOrderTask($order['order_id']);
                 //echo $order['status'], '***', $task->step_description,'<br>';
-                if ($order['status'] != $task->step_description && $task->is_complete == 'N') {
+                if ($order['status'] != $task->step_description && $task->is_complete != 'Y') {
                     $arr = array();
                     $arr['task_id'] = $task->task_id;
                     $arr['step_count'] = $task->step_count;
@@ -99,7 +99,8 @@ class Task extends Model
                     $arr['step_reason'] = "Обновление статуса заказа";
                     $arr['status'] = $order['status'];
                     $this->updateTaskResponsibility($arr['task_id'],0);
-                    $this->changeTaskStatus($arr);
+                    if($order['status_middle']) $this->middleTask($arr);
+                    else $this->changeTaskStatus($arr);
                 }
             } else {
                 $arrp = array();
@@ -132,15 +133,26 @@ class Task extends Model
         }
     }
     public function getTasks(){
-        return $this->join('task_types', 'tasks.task_type', '=', 'task_types.task_type_id')
+        return $this->tasks('N')->get();
+    }
+    public function getMiddleTasks(){
+        return $this->tasks('M')->get();
+    }
+    public function getCompleteTasks(){
+        return $this->tasks('Y')->get();
+    }
+
+    //WARNING! SCOPE!
+    public function scopeTasks($query,$is){
+        $query->join('task_types', 'tasks.task_type', '=', 'task_types.task_type_id')
             ->Join('tasks_history', 'task_id', '=', 'tasks.id')
             ->where('priority_index','>',0)
-            ->where('tasks.is_complete','!=','Y')
+            ->where('tasks.is_complete','=',$is)
             ->orderBy('priority_index', 'asc')
             ->orderBy('tasks_history.step_count', 'asc')
-            ->select('tasks.*', 'task_types.*','tasks_history.*')
-            ->get();
+            ->select('tasks.*', 'task_types.*','tasks_history.*');
     }
+
     public function getTaskOrders($begin_date){
         return $this->join('order_tasks', 'tasks.task_content', '=', 'order_tasks.order_task_id')
             ->where('order_tasks.order_date','>=',$begin_date)
@@ -193,6 +205,22 @@ class Task extends Model
             ]);
         $this->where('id',$arr['task_id'])
             ->update(array('is_complete' => 'Y' )
+            );
+
+    }
+    public function middleTask($arr){
+        DB::table('tasks_history')->where('task_id',$arr['task_id'])
+            ->where('step_count',$arr['step_count'])
+            ->update(['time_spended'=>$arr['waiting']]);
+        DB::table('tasks_history')->insert(
+            [
+                "task_id" =>$arr['task_id'],
+                "step_reason"=>$arr['step_reason'],
+                "step_count"=>$arr['step_count']+1,
+                "step_description"=>$arr['status'],
+            ]);
+        $this->where('id',$arr['task_id'])
+            ->update(array('is_complete' => 'M' )
             );
 
     }

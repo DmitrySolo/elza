@@ -176,6 +176,7 @@ class AjaxFormController extends Controller
     public function newCDEK(Request $request,Document $doc){
         $input = [
             'Number' => $request->rds,
+            'deliveryCost' => 0,
             'phone' => '',
             'email' => '',
             'name' => '',
@@ -209,7 +210,7 @@ class AjaxFormController extends Controller
                         ]
                     ]
                 ];
-            }
+            }else $input['deliveryCost']=intval($resItem['price']);
         }
         $packagenum=0;
         if(isset($input['PACKAGES']))$packagenum=count($input['PACKAGES']);
