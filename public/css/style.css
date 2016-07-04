@@ -105,7 +105,11 @@ body >.container-fluid {
 .cdek-group.what .product input{
     width: 112%;
 }
-
 .form-group .product{
     background-color: white;
+.cdek-form .cdek-group input.long{
+    width: 240%;
+}
+.tab-content {
+    background-color: antiquewhite;
 }
