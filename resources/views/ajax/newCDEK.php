@@ -7,6 +7,7 @@
                 </div>
             </div>
         </div>
+        <input type="hidden" name="deliveryCost" value="<?=isset($input)?$input['deliveryCost']:''?>">
         <div class="cdek-group where">
             <h3>Местоположение</h3>
             <div class="form-group">
@@ -106,9 +107,9 @@
                             <label><input type="text" class="form-control" placeholder="Вес комплекта" value="<?=$pk['weight']?>" name="PACKAGES[<?=$package?>][weight]"></label>
                         </div>
                         <div class="col-xs-8">
-                            <label>Габариты:<input type="text" class="form-control" value="<?=$pk['size_a']?>" name="PACKAGES[<?=$package?>][size_a]">
-                                <input type="text" class="form-control" value="<?=$pk['size_b']?>" name="PACKAGES[<?=$package?>][size_b]">
-                                <input type="text" class="form-control" value="<?=$pk['size_c']?>" name="PACKAGES[<?=$package?>][size_c]"></label>
+                            <label>Габариты:<input type="text" class="form-control" value="<?=$pk['size_a']?>" name="PACKAGES[<?=$package?>][size_a]"></label>
+                            <label><input type="text" class="form-control" value="<?=$pk['size_b']?>" name="PACKAGES[<?=$package?>][size_b]"></label>
+                            <label><input type="text" class="form-control" value="<?=$pk['size_c']?>" name="PACKAGES[<?=$package?>][size_c]"></label>
                         </div>
                     </div>
                     <?$item=0;
@@ -117,23 +118,13 @@
                             $item=$itemNum;
                             ?>
                             <div class="form-group product" data-package="<?=$package?>" data-item="<?=$item?>">
-                                <div class="col-xs-2">
-                                    <label><input type="text" class="form-control" placeholder="Артикул товара" value="<?=$it['sku']?>" name="PACKAGES[<?=$package?>][Items][<?=$item?>][sku]"></label>
-                                </div>
-                                <div class="col-xs-5">
-                                    <label><input type="text" class="form-control long" placeholder="Наименование товара" value="<?=$it['name']?>" name="PACKAGES[<?=$package?>][Items][<?=$item?>][name]"></label>
-                                </div>
-                                <div class="col-xs-1">
-                                    <label><input type="text" class="form-control" placeholder="Кол-во" value="<?=$it['amount']?>" name="PACKAGES[<?=$package?>][Items][<?=$item?>][amount]"></label>
-                                </div>
-                                <div class="col-xs-1">
-                                    <label><input type="text" class="form-control" placeholder="Цена" value="<?=$it['price']?>" name="PACKAGES[<?=$package?>][Items][<?=$item?>][price]"></label>
-                                </div>
-                                <div class="col-xs-2">
-                                    <label><input type="text" class="form-control" placeholder="Оплата при получении" value="<?=$it['payment']?>" name="PACKAGES[<?=$package?>][Items][<?=$item?>][payment]"></label>
-                                </div>
-                                <div class="col-xs-1">
-                                    <label><input type="text" class="form-control" placeholder="Вес" value="<?=$it['weight']?>" name="PACKAGES[<?=$package?>][Items][<?=$item?>][weight]"></label>
+                                <div class="col-xs-12">
+                                    <label><input type="text" style="width: 70px;" class="form-control" placeholder="Артикул товара" value="<?=$it['sku']?>" name="PACKAGES[<?=$package?>][Items][<?=$item?>][sku]"></label>
+                                    <label><input type="text" style="width: 600px;" class="form-control" placeholder="Наименование товара" value="<?=$it['name']?>" name="PACKAGES[<?=$package?>][Items][<?=$item?>][name]"></label>
+                                    <label><input type="text" style="width: 60px;" class="form-control" placeholder="Кол-во" value="<?=$it['amount']?>" name="PACKAGES[<?=$package?>][Items][<?=$item?>][amount]"></label>
+                                    <label><input type="text" style="width: 60px;" class="form-control" placeholder="Цена" value="<?=$it['price']?>" name="PACKAGES[<?=$package?>][Items][<?=$item?>][price]"></label>
+                                    <label><input type="text" style="width: 170px;" class="form-control" placeholder="Оплата при получении" value="<?=$it['payment']?>" name="PACKAGES[<?=$package?>][Items][<?=$item?>][payment]"></label>
+                                    <label><input type="text" style="width: 50px;" class="form-control" placeholder="Вес" value="<?=$it['weight']?>" name="PACKAGES[<?=$package?>][Items][<?=$item?>][weight]"></label>
                                 </div>
                             </div>
                         <?}

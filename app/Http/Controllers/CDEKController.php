@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
@@ -52,69 +53,6 @@ class CDEKController extends Controller
                 41=> "ВОЗВРАТ ДОКУМЕНТОВ",
                 42 => "АГЕНТСКОЕ ВОЗНАГРАЖДЕНИЕ"),
     );
-
-    public function test(){
-        //$ch=curl_init("http://gw.edostavka.ru:11443/new_orders.php");
-        //$ch=curl_init("http://gw.edostavka.ru:11443/status_report_h.php");
-        $ch=curl_init("http://gw.edostavka.ru:11443/info_report.php");
-        $date=date("Y-m-d");
-        /*$account="f6c3b39e4a505d6797b4dc01c6fe0279";
-        $secure_password="fba640bcdfe840354b69ad2ef222fee5";*/
-        $account="b62fd71f538cd2de349dc5b033ec1bae";
-        $secure_password="f3e259e1d137f7f2c8fe6bcfc4109095";
-        $secure=md5("$date&$secure_password");
-        /*$post1=array(
-            'xml_request'=>"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
-<DeliveryRequest Number=\"237\" Date=\"$date\" Account=\"$account\" Secure=\"$secure\" OrderCount=\"1\">
-    <Order Number=\"5408\"
-        DeliveryRecipientCost=\"0\"
-        SendCityCode=\"270\"
-        RecCityCode=\"44\"
-        RecipientName=\"Васина Юлия Александровна\"
-        Phone=\"7810999\"
-        Comment=\"Офис группы компаний Ланит. При приезде позвонить на мобильный телефон.\"
-        TariffTypeCode=\"5\"
-        RecientCurrency=\"RUB\"
-        ItemsCurrency=\"RUB\">
-        <Address PvzCode=\"MSK2\" Street=\"Боровая\" House=\"д. 7, стр. 2\" Flat=\"оф.10\" />
-        <Package Number=\"1\" BarCode=\"101\" Weight=\"630\">
-           <Item WareKey=\"25000050368\" Cost=\"49\" Payment=\"49\" Weight=\"68\" Amount=\"1\" Comment=\"Дидактические игры-занятия в ДОУ 	 	   Ст.возраст Вып. 1\"/>
-           <Item WareKey=\"25000348563\" Cost=\"79\" Payment=\"79\" Weight=\"95\" Amount=\"1\" Comment=\"ДошкВоспитаниеИРазвитие(Айрис-Пр.)	(о) 	   Сюжетно-роле\"/>
-           <Item WareKey=\"25000373314\" Cost=\"79\" Payment=\"79\" Weight=\"135\" Amount=\"1\" Comment=\"ДошкВоспитаниеИРазвитие(Айрис-Пр.)	(о) 	   Метод.работа\"/>
-           <Item WareKey=\"25000390270\" Cost=\"79\" Payment=\"79\" Weight=\"219\" Amount=\"1\" Comment=\"Дошкольники_УчимРазвиваемВоспитываем 	   Родительские \"/>
-        </Package>
-        <AddService ServiceCode=\"30\"></AddService>
-        <Schedule>
-           <Attempt ID=\"1\" Date=\"$date\" TimeBeg=\"09:00:00\" TimeEnd=\"13:00:00\" />
-           <Attempt ID=\"2\" Date=\"$date\" TimeBeg=\"14:00:00\" TimeEnd=\"18:00:00\" RecipientName=\"Прокопьев 	Анатолий Сергеевич\" />
-        </Schedule>
-    </Order>
-</DeliveryRequest>"
-        );*/
-        /*$post=array(
-            'xml_request'=>"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
-<StatusReport Date=\"$date\" Account=\"$account\" Secure=\"$secure\" ShowHistory=\"1\" ShowReturnOrder=\"1\" ShowReturnOrderHistory=\"1\">".
-//"<ChangePeriod DateFirst=\"2015-12-01\" DateLast=\"2016-02-28\"/><Order ReturnDispatchNumber=\"1022124947\" />".
-"    <Order Number=\"РДС-002863\" />
-</StatusReport>"
-        );
-        $post2=array(
-            'xml_request'=>"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
-<InfoRequest Date=\"$date\" Account=\"$account\" Secure=\"$secure\">
-    <Order DispatchNumber=\"1023054988\" />
-</InfoRequest>"
-        );
-        curl_setopt_array($ch, array(
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $post2,
-        ));
-        $xml=curl_exec($ch);
-        $data=Parser::xml($xml);
-        $data['xml']=$xml;
-        dd($data);*/
-        dd($this->basicCDEK('РДС-002863'));
-    }
 
     public function getNumberByReturn($number,$dateFirst,$dateLast){
         $arInfo=array(
@@ -277,6 +215,47 @@ class CDEKController extends Controller
         //return $arResult;
         return $arResult;
     }
+    public function orderPrint($number){
+        $date=date("Y-m-d");
+
+        $account="f6c3b39e4a505d6797b4dc01c6fe0279";
+        $secure_password="fba640bcdfe840354b69ad2ef222fee5";
+        $secure=md5("$date&$secure_password");
+        $attributes['Date']=$date;
+        $attributes['Account']=$account;
+        $attributes['Secure']=$secure;
+
+        $arResult=['Number'=>$number];
+        $arReport=array(
+            array(
+                'OBJECT'=>'Order',
+                'ATTRIBUTES'=>['Number'=>$number]
+            )
+        );
+        $report=$this->_getCDEK($this->_status_report($arReport,$attributes));
+        //dd($report);
+        if(isset($report['@attributes']['ErrorCode'])){
+            $arr['Status']['Description']='';
+            $arr['Status']['CityName']='';
+            $arr['DeliverySumTotal']='';
+            $arr['ERROR_CDEK']="Накладная СДЭК $number не найдена: ".$report['@attributes']['ErrorCode'];
+            return $arr;
+        }
+        $order=$report['Order'];
+        if(!isset($order['@attributes'])){
+            $order=end($order);
+        }
+        $arResult['DispatchNumber']=$order['@attributes']['DispatchNumber'];
+
+        $arPrint=array(
+            array(
+                'OBJECT'=>'Order',
+                'ATTRIBUTES'=>['DispatchNumber'=>$arResult['DispatchNumber']]
+            )
+        );
+        $print=$this->_getCDEKPDF($this->_orders_print($arPrint,['OrderCount'=>1,'CopyCount'=>4]));
+        return response($print)->header('Content-Type', 'application/pdf');
+    }
 
     public function getPVZ($cityID){
         $ch=curl_init($this->home."pvzlist.php?cityid=$cityID");
@@ -316,6 +295,37 @@ class CDEKController extends Controller
         $xml=curl_exec($ch);
         $data=Parser::xml($xml);
         return $data;
+    }
+
+    private function _getCDEKPDF($arParams){
+        $ch=curl_init($this->home.$arParams['PATH']);
+        curl_setopt_array($ch, array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $arParams['POST'],
+        ));
+        $data=curl_exec($ch);
+        return $data;
+    }
+
+    private function _orders_print($arParams,$attributes=array()){
+        $date=date("Y-m-d");
+
+        $account="f6c3b39e4a505d6797b4dc01c6fe0279";
+        $secure_password="fba640bcdfe840354b69ad2ef222fee5";
+        $secure=md5("$date&$secure_password");
+        $attributes['Date']=$date;
+        $attributes['Account']=$account;
+        $attributes['Secure']=$secure;
+
+        $arTitle=array(
+            'TITLE'=>"OrdersPrint",
+            'ATTRIBUTES'=>$attributes
+        );
+        return array(
+            'PATH' => "orders_print.php",
+            'POST' => array('xml_request'=>$this->_simple_xml($arTitle,$arParams))
+        );
     }
 
     private function _info_report($arParams){
@@ -361,6 +371,7 @@ class CDEKController extends Controller
                 'ATTRIBUTES'=>[
                     'DateInvoice'=>$date,
                     'Number'=>$order['Number'],
+                    'DeliveryRecipientCost'=>$order['deliveryCost'],
                     'Phone'=>$order['phone'],
                     'RecipientEmail'=>$order['email'],
                     'RecipientName'=>$order['name'],

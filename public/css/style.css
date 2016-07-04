@@ -75,9 +75,8 @@ body >.container-fluid {
 
 .cdek-group{
     background-color: white;
-    border-radius: 10px;
-    padding: 15px;
-    margin: 15px;
+    padding: 5px;
+    margin: 5px;
 }
 .cdek-group h3{
     text-transform: uppercase;
@@ -97,9 +96,16 @@ body >.container-fluid {
     background-color: #f1a899;
 }
 
+.cdek-group label{
+    margin-bottom: 0;
+}
+.cdek-group.what .form-group{
+    margin-bottom: 0;
+}
 .cdek-group.what .product input{
     width: 112%;
 }
-.cdek-form .cdek-group input.long{
-    width: 240%;
+
+.form-group .product{
+    background-color: white;
 }

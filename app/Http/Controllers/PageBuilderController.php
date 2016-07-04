@@ -187,10 +187,12 @@ class PageBuilderController extends Controller
     }
 
     public function newCDEK(Request $request,CDEKController $CDEK){
+        $suffix='';
         if(isset($request->newcdek)){
             $response=$CDEK->newDelivery([$request->all()]);
-            dd($response);
+            //dd($response);
             $mainData = array('response' => $response);
+            $suffix='response';
         }else {
             $input = [
                 'Number' => 'РДС-',
@@ -212,7 +214,7 @@ class PageBuilderController extends Controller
         $leftsidebarData = array('data' => 'leftsidebar');
         $rightsidebarData = array('data' => 'rightsidebar');
         return view()->make('main')
-            ->nest('main', 'ajax.newCDEK', $mainData)
+            ->nest('main', 'ajax.newCDEK'.$suffix, $mainData)
             ->nest('header', 'child.header', $headerData)
             ->nest('footer', 'child.footer')
             ->nest('leftsidebar', 'child.leftsidebar', $leftsidebarData)
