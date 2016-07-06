@@ -93,7 +93,7 @@ class PageBuilderController extends Controller
                     if(isset($lInfo[$resItem['number']]['Package']) && !empty($lInfo[$resItem['number']]['Package'])){
                         foreach ($lInfo[$resItem['number']]['Package'] as $itemq ){
                             //dd($itemq);
-                            if(isset($itemq['Item'])) {
+                            if(isset($itemq['Item']['@attributes'])) {
                                 $key = $itemq['Item']['@attributes']['WareKey'];
                                 $value = $itemq['Item']['@attributes']['DelivAmount'];
                                 $package[$key] = $value;

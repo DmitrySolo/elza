@@ -113,7 +113,7 @@ class AjaxFormController extends Controller
         if(isset($resCdek['Package']) && !empty($resCdek['Package'])){
             foreach ($resCdek['Package'] as $itemq ){
                 //dd($itemq);
-                if(isset($itemq['Item'])) {
+                if(isset($itemq['Item']['@attributes'])) {
                     $key = $itemq['Item']['@attributes']['WareKey'];
                     $value = $itemq['Item']['@attributes']['DelivAmount'];
                     $package[$key] = $value;
