@@ -1,5 +1,7 @@
 <?php
 namespace App\Http\Controllers;
+use App\Models\MCategoriesGroup;
+use App\Models\MCity;
 use Symfony\Component\DomCrawler\Crawler;
 use Illuminate\Http\Request;
 
@@ -13,12 +15,48 @@ class SearchStatsController extends Controller {
         $this->cookiePath='/home/'.$this->cookiePath.'/cookie.txt';
     }
 
-    function getResult(){
+    function getResult($text='',$city_name=''){
+        $arResult=array();
+        $m_group=new MCategoriesGroup();
+        $groups=$m_group->getGroups();
+        if(!empty($text)){
+            $arResult[]=array(
+                'QUERY'=>$text,
+                'SEARCH'=>$this->getCitiesSearch($text,$city_name)
+            );
+        }else
+        foreach($groups as $group){
+            $arResult[]=array(
+                'QUERY'=>$group->category_group_name,
+                'SEARCH'=>$this->getCitiesSearch($group->category_group_name,$city_name)
+            );
+        }
+        return($arResult);
+    }
+
+    function getCitiesSearch($text,$city_name=''){
+        $arResult=array();
+        $m_city=new MCity();
+        $cities=$m_city->getCities();
+        foreach($cities as $city){
+            if(!empty($city_name)&&$city_name!=$city->region_name) continue;
+            $arCity=array();
+            $arCity['REGION']=$city->region_name;
+            $arCity['RESULT']=$this->getSearch($text,$city->city_ya_id);
+            sleep(2);
+            $arCity['RESULT_CITY']=$this->getSearch($text.' '.$city->region_name,$city->city_ya_id);
+            $arResult[]=$arCity;
+        }
+        return($arResult);
+    }
+
+    function getSearch($text,$ya_city=0){
         self::$advert=array();//реклама
         self::$search=array();//результаты поиска
 
         //goolemur
-        $this->_google_cr("сантехника воронеж")->filter("cite")->each(function (Crawler $v, $i) {
+        $node_list=$this->_google_cr($text)->filter("cite");
+        if($node_list->count())$node_list->each(function (Crawler $v, $i) {
             preg_match("/(.+?)\//", $v->text(),$val);
             $val=str_replace("www.", "", $val[1]);
             //dd($v->parents()->eq(5)->attr('id'));
@@ -27,7 +65,8 @@ class SearchStatsController extends Controller {
             else SearchStatsController::$search['google'][]=$val;
         });
         //yalemur
-        $this->_ya_cr("сантехника воронеж",213)->filter(".serp-url")->each(function (Crawler $v, $i) {
+        $node_list=$this->_ya_cr($text,$ya_city)->filter(".serp-url");
+        if($node_list->count())$node_list->each(function (Crawler $v, $i) {
             $v=$v->filter(".serp-url__link")->eq(0);
             $val=$v->text();
             $adv=$v->previousAll();
@@ -38,7 +77,7 @@ class SearchStatsController extends Controller {
             else SearchStatsController::$search['yandex'][]=$val;
         });
 
-        dd(['advert'=>SearchStatsController::$advert,'search'=>SearchStatsController::$search]);
+        return(['advert'=>SearchStatsController::$advert,'search'=>SearchStatsController::$search]);
     }
 
 
@@ -67,8 +106,9 @@ class SearchStatsController extends Controller {
      * @param $city_id
      * @return Crawler
      */
-    private function _ya_cr($text,$city_id){
-        $params=array('text'=>urlencode($text),'lr'=>$city_id);
+    private function _ya_cr($text,$city_id=0){
+        $params=array('text'=>urlencode($text));
+        if($city_id)$params['lr']=$city_id;
         return $this->_curl_cr('yandex.ru/yandsearch',$params);
     }
     /**
