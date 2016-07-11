@@ -93,7 +93,7 @@ class PageBuilderController extends Controller
                     if(isset($lInfo[$resItem['number']]['Package']) && !empty($lInfo[$resItem['number']]['Package'])){
                         foreach ($lInfo[$resItem['number']]['Package'] as $itemq ){
                             //dd($itemq);
-                            if(isset($itemq['Item'])) {
+                            if(isset($itemq['Item']['@attributes'])) {
                                 $key = $itemq['Item']['@attributes']['WareKey'];
                                 $value = $itemq['Item']['@attributes']['DelivAmount'];
                                 $package[$key] = $value;
@@ -118,8 +118,8 @@ class PageBuilderController extends Controller
                             $lInfo[$resItem['number']]['delivery_cost'] = $resItem['price'];
                         } else {
                             $lInfo[$resItem['number']]['real_quantity'] = (array_key_exists($resItem['sku'],$package))?$package[$resItem['sku']]:$resItem['quantity'];
-                            $lInfo[$resItem['number']]['total_price'] = $lInfo[$resItem['number']]['total_price'] += $resItem['price'] * $lInfo[$resItem['number']]['real_quantity'];
-                            $lInfo[$resItem['number']]['total_base_price'] = $lInfo[$resItem['number']]['total_base_price'] += $resItem['base_price'] * $lInfo[$resItem['number']]['real_quantity'];
+                            $lInfo[$resItem['number']]['total_price'] += $resItem['price'] * $lInfo[$resItem['number']]['real_quantity'];
+                            $lInfo[$resItem['number']]['total_base_price'] += $resItem['base_price']/* * $lInfo[$resItem['number']]['real_quantity']*/;
                         }
                     }
 
@@ -164,6 +164,25 @@ class PageBuilderController extends Controller
             ->nest('main','child.rdsList',['data'=>$list])
             ->nest('header', 'child.header',$headerData)
             ->nest('footer', 'child.footer',['rds'=>$footerData])
+            ->nest('leftsidebar', 'child.leftsidebar',$leftsidebarData)
+            ->nest('rightsidebar', 'child.rightsidebar',$rightsidebarData);
+    }
+
+    public function getSearchResult(Request $request,SearchStatsController $search){
+        $data=array('category'=>'','city'=>'');
+        if(isset($request->category))$data['category']=$request->category;
+        if(isset($request->city))$data['city']=$request->city;
+
+        $result=$search->getResult($data['category'],$data['city']);
+        //dd($result);
+
+        $headerData=array('data'=>'header');
+        $leftsidebarData=array('data'=>'leftsidebar');
+        $rightsidebarData=array('data'=>'rightsidebar');
+        return view()->make('main')
+            ->nest('main','child.searchList',['data'=>$data,'result'=>$result])
+            ->nest('header', 'child.header',$headerData)
+            ->nest('footer', 'child.footer')
             ->nest('leftsidebar', 'child.leftsidebar',$leftsidebarData)
             ->nest('rightsidebar', 'child.rightsidebar',$rightsidebarData);
     }

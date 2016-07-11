@@ -113,7 +113,7 @@ class AjaxFormController extends Controller
         if(isset($resCdek['Package']) && !empty($resCdek['Package'])){
             foreach ($resCdek['Package'] as $itemq ){
                 //dd($itemq);
-                if(isset($itemq['Item'])) {
+                if(isset($itemq['Item']['@attributes'])) {
                     $key = $itemq['Item']['@attributes']['WareKey'];
                     $value = $itemq['Item']['@attributes']['DelivAmount'];
                     $package[$key] = $value;
@@ -142,12 +142,12 @@ class AjaxFormController extends Controller
             else {
                 $goods['products'][$flag]['sku'] = $resItem['sku'];
                 $goods['products'][$flag]['product_name'] = $resItem['product_name'];
-                $goods['products'][$flag]['price'] = $resItem['price'];
                 $goods['products'][$flag]['real_quantity'] = (array_key_exists($resItem['sku'],$package))?$package[$resItem['sku']]:$resItem['quantity'];
+                $goods['products'][$flag]['price'] = $resItem['price']*$goods['products'][$flag]['real_quantity'];
                 $goods['products'][$flag]['base'] = $resItem['base_price'];
                 $goods['products'][$flag]['rds_quantity'] = $resItem['quantity'];
-                $goods['total_price'] = $goods['total_price'] += $resItem['price']* $goods['products'][$flag]['real_quantity'];
-                $goods['total_base_price'] = $goods['total_base_price'] += $resItem['base_price']* $goods['products'][$flag]['real_quantity'];
+                $goods['total_price'] += $resItem['price']* $goods['products'][$flag]['real_quantity'];
+                $goods['total_base_price'] += $resItem['base_price']/** $goods['products'][$flag]['real_quantity']*/;
             }
             $flag++;
         }

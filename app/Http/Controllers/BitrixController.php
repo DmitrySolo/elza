@@ -122,6 +122,7 @@ class BitrixController extends Controller
         $ch=curl_init("http://$site/testzone/$json_send/elza.json");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
         $out=curl_exec($ch);
+        curl_close($ch);
         $data=json_decode($out,true);
         return $data;
     }
