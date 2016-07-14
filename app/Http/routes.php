@@ -63,6 +63,8 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/settask','WelcomeController@setTask');
     Route::get('/rv','TaskController@reviewTasks');
     Route::get('/search','PageBuilderController@getSearchResult');
+    Route::get('/searchman','PageBuilderController@searchManager');
+    Route::post('/searchman','PageBuilderController@searchManager');
     Route::get('/checkcaptcha','SearchStatsController@yaRestore');
     Route::get('/rds','PageBuilderController@getRDSList');
     Route::get('/bitrix','PageBuilderController@getBitrixList');
