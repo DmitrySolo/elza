@@ -168,13 +168,26 @@ class PageBuilderController extends Controller
             ->nest('rightsidebar', 'child.rightsidebar',$rightsidebarData);
     }
 
+    public function searchManager(Request $request,SearchStatsController $search){
+        $search->manage($request);
+        $mainData=$search->getData();
+        $headerData=array('data'=>'header');
+        $leftsidebarData=array('data'=>'leftsidebar');
+        $rightsidebarData=array('data'=>'rightsidebar');
+        return view()->make('main')
+            ->nest('main','child.searchManager',$mainData)
+            ->nest('header', 'child.header',$headerData)
+            ->nest('footer', 'child.footer')
+            ->nest('leftsidebar', 'child.leftsidebar',$leftsidebarData)
+            ->nest('rightsidebar', 'child.rightsidebar',$rightsidebarData);
+    }
     public function getSearchResult(Request $request,SearchStatsController $search){
         $data=array('category'=>'','city'=>'');
         if(isset($request->category))$data['category']=$request->category;
         if(isset($request->city))$data['city']=$request->city;
 
         $result=$search->getResult($data['category'],$data['city']);
-        //dd($result);
+        $search->saveResult($data,$result);
 
         $headerData=array('data'=>'header');
         $leftsidebarData=array('data'=>'leftsidebar');
