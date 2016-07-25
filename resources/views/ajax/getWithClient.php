@@ -147,7 +147,7 @@
 </tr>
 <tr>
     <td colspan="4" align="center">Дополнительные услуги обошлись:</td>
-    <?php foreach( $data['pp']['services'] as $service_name=>$price):?>
+    <?php if(isset($data['pp']['services'])) foreach( $data['pp']['services'] as $service_name=>$price):?>
 <tr><td> <?php echo $service_name ?> </td>
     <td><?php echo $price ?></td></tr>
     <? endforeach;?>
