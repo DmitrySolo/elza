@@ -7,18 +7,36 @@ use App\Models\MKeyword;
 use App\Models\MRegion;
 use App\Models\MCity;
 use App\Models\MSite;
+use App\Models\ProxyList;
 use App\Models\SearchHistory;
 use Symfony\Component\DomCrawler\Crawler;
 use Illuminate\Http\Request;
+//use Additional\AngryCurl;
 
 class SearchStatsController extends Controller {
 
     static $google,$yandex;
     private $cookiePath;
+    private $proxyList,$proxyCount,$proxyPos=0;
+    private $agentList,$agentCount,$agentPos=4573;
+    //private $AC;
 
     function __construct(){
-        $this->cookiePath=str_replace('elza.','',$_SERVER['HTTP_HOST']);
-        $this->cookiePath='/home/'.$this->cookiePath.'/cookie.txt';
+        $user=str_replace('elza.','',$_SERVER['HTTP_HOST']);
+        if($user=='local')$user='inadmin';
+
+        $this->cookiePath="/home/$user/cookie.txt";
+        //$this->AC=new AngryCurl('callback_function');
+        $proxy=new ProxyList();
+        $this->proxyList=$proxy->getProxyList();
+        $this->proxyCount=count($this->proxyList);
+        $agents=file_get_contents("/home/$user/www/elza/additional/user_agent.txt");
+        $this->agentList=explode("\n",$agents);
+        $this->agentCount=count($this->agentList);
+    }
+
+    function clearCookies(){
+        unlink($this->cookiePath);
     }
 
     function manage(Request $request){
@@ -73,21 +91,40 @@ class SearchStatsController extends Controller {
         $res=json_encode($result, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
         $search=new SearchHistory();
         $search->set(['search_parameters'=>$params,'search_result'=>$res]);
+        $this->saveStats($result);
+    }
+    function saveStats($result){
         $m_site=new MSite();
-        $m_site->clearPoints();
+        $m_site->clear();
         foreach($result as $region=>$cities):
-        foreach($cities as $city=>$queries):
-        foreach($queries as $query=>$services):
-        foreach($services as $service_name=>$service):
-        foreach($service as $service_group=>$sites):
-        foreach($sites as $site):
-            $m_site->setSite($site,$service_name,$service_group);
+            foreach($cities as $city=>$queries):
+                foreach($queries as $query=>$services):
+                    foreach($services as $service_name=>$service):
+                        foreach($service as $service_group=>$sites):
+                            foreach($sites as $site):
+                                $m_site->setSite(trim($site),$service_name,$service_group);
+                            endforeach;
+                        endforeach;
+                    endforeach;
+                endforeach;
+            endforeach;
         endforeach;
-        endforeach;
-        endforeach;
-        endforeach;
-        endforeach;
-        endforeach;
+    }
+    public function searchStats(Request $request){
+        $data=array('category'=>'','city'=>'');
+        if(isset($request->category))$data['category']=$request->category;
+        if(isset($request->city))$data['city']=$request->city;
+
+        $result=$this->getResultHistory([$data['category'],$data['city']]);
+        $this->saveStats($result);
+
+        return 'ok';
+    }
+
+    function getResultHistory($params){
+        $params=implode('|',$params);
+        $search=new SearchHistory();
+        return json_decode($search->get($params)->search_result,true);
     }
 
     function getResult($text='',$city_name=''){
@@ -118,15 +155,66 @@ class SearchStatsController extends Controller {
         return($arResult);
     }
 
+    function getSearchSteps(Request $request){
+        $arResult=array();
+        $arResult['date']=date('Y-m-d H:i:s');
+        if(isset($request->category)&&isset($request->city)){
+            $arResult['params']=['category'=>$request->category,'city'=>$request->city];
+            $m_group=new MCategoriesGroup();
+            $groups=$m_group->getGroups();
+            $m_keyword=new MKeyword();
+            $keywords=$m_keyword->getKeywords();
+            $m_brand=new MBrand();
+            $brands=$m_brand->getBrands();
+            if(!empty($request->category))$arResult['steps'][]=['text'=>$request->category,'city_name'=>$request->city];
+            else{
+                foreach($groups as $group) {
+                    $arResult['steps'][]=['text'=>$group->category_group_name,'city_name'=>$request->city];
+                }
+                foreach($brands as $brand) {
+                    $arResult['steps'][]=['text'=>$brand->brand_name,'city_name'=>$request->city];
+                }
+                foreach($keywords as $keyword){
+                    foreach($groups as $group) {
+                        $arResult['steps'][]=['text'=>$group->category_group_name.' '.$keyword->keyword_name,'city_name'=>$request->city];
+                    }
+                    foreach($brands as $brand) {
+                        $arResult['steps'][]=['text'=>$brand->brand_name.' '.$keyword->keyword_name,'city_name'=>$request->city];
+                    }
+                }
+            }
+        }
+        return($arResult);
+    }
+
+    function runSearchStep(Request $request){
+        if(isset($request->text)&&isset($request->city_name)&&isset($request->date)){
+            $this->_init_agent();
+            $this->_init_proxy();
+            $result=$this->getCitiesSearch($request->text,$request->city_name);
+            if(isset($result['error'])) return $result;
+            else{
+                $sh = new SearchHistory();
+                $sh->setToDate($request->date,['search_parameters'=>'|'/*implode('|',['category'=>'','city'=>''])*/,'search_result'=>$result]);
+                return ['status'=>'success'];
+            }
+        }
+        return ['error'=>'not found'];
+    }
+
     function getCitiesSearch($text,$city_name=''){
         $arResult=array();
         $m_city=new MRegion();
         $cities=$m_city->getCities();
         foreach($cities as $city){
             if(!empty($city_name)&&$city_name!=$city->city_name) continue;
-            $arResult[$city->region_name][$city->city_name][$text]=$this->getSearch($text,$city->city_ya_id);
+            $result=$this->getSearch($text,$city->city_ya_id);
+            if(isset($result['error']))return $result;
+            $arResult[$city->region_name][$city->city_name][$text]=$result;
             sleep(2);
-            $arResult[$city->region_name][$city->city_name][$text.' '.$city->city_name]=$this->getSearch($text.' '.$city->city_name,$city->city_ya_id);
+            $result=$this->getSearch($text.' '.$city->city_name,$city->city_ya_id);
+            if(isset($result['error']))return $result;
+            $arResult[$city->region_name][$city->city_name][$text.' '.$city->city_name]=$result;
         }
         return($arResult);
     }
@@ -136,19 +224,43 @@ class SearchStatsController extends Controller {
         self::$yandex=array();//результаты поиска
 
         //goolemur
-        $node_list=$this->_google_cr($text)->filter("cite");
-        if($node_list->count())$node_list->each(function (Crawler $v, $i) {
+        $err=0;
+        $node_list=new Crawler();
+        //while ($err<15) {
+            $crawler = $this->_google_cr($text);
+            if (!$crawler->count()) return ['error' => ['google' => 'empty']];
+            $node_list = $crawler->filter("cite");
+            if (!$node_list->count()) {
+                //$this->_init_agent();
+                //$this->_init_proxy();
+                //$err++;
+                return ['error' => ['google' => 'empty']];
+            }
+        //}
+        //if($err>=15) return ['error' => ['google' => 'empty']];
+        $node_list->each(function (Crawler $v, $i) {
             //echo '***'.$v->text().'***|';
             $val=str_replace("https://", "", $v->text());
             preg_match("/(.+?)\//", $val,$matches);
             $val=str_replace("www.", "", isset($matches[1])?$matches[1]:$val);
+            preg_match("/(.+?)\ \›/", $val,$matches);
+            $val=isset($matches[1])?$matches[1]:$val;
             //dd($v->parents()->eq(5)->attr('id'));
             $adv = $v->parents()->eq(5)->attr('id')!='search';
             if($adv)self::$google['advert'][]=$val;
             else self::$google['search'][]=$val;
         });
         //yalemur
-        $node_list=$this->_ya_cr($text,$ya_city)->filter(".organic__subtitle");
+        $crawler=$this->_ya_cr($text,$ya_city);
+        if(!$crawler->count())return ['error'=>['yandex'=>'empty']];
+        if($crawler->filter(".form_error_no")->count()){
+            $arrErr=['error'=>['yandex'=>$crawler->html()]];
+            $arrErr['img']=$crawler->filter(".image.form__captcha")->attr('src');
+            $arrErr['key']=$crawler->filter(".form__key")->attr('value');
+            $arrErr['retpath']=$crawler->filter(".form__retpath")->attr('value');
+            return $arrErr;
+        }
+        $node_list=$crawler->filter(".organic__subtitle");
         if($node_list->count())$node_list->each(function (Crawler $v, $i) {
             $v=$v->filter(".organic__path")->eq(0);
             $adv=$v->previousAll();
@@ -162,17 +274,36 @@ class SearchStatsController extends Controller {
             if($adv)self::$yandex['advert'][]=$val;
             else self::$yandex['search'][]=$val;
         });
+        //yalemur
+        $node_list=$crawler->filter(".serp-url");
+        if($node_list->count())$node_list->each(function (Crawler $v, $i) {
+            $v=$v->filter(".serp-url__link")->eq(0);
+            $adv=$v->previousAll();
+            if($adv->count()) $adv=$adv->text();
+            else $adv=0;
+            $val=str_replace("https://", "", $v->text());
+            preg_match("/(.+?)\//", $val,$matches);
+            $val=str_replace("www.", "", isset($matches[1])?$matches[1]:$val);
+            //dd($adv);
+            if($adv)self::$yandex['advert'][]=$val;
+            else self::$yandex['search'][]=$val;
+        });
 
         return(['google'=>self::$google,'yandex'=>self::$yandex]);
     }
 
 
     function yaRestore(Request $request){
+        /*$this->_init_agent();
+        echo 'poosss=',$this->agentPos;*/
+        //dd($request);
         if(isset($request->key)){
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+            curl_setopt($curl, CURLOPT_BINARYTRANSFER,true);
             curl_setopt($curl, CURLOPT_SSL_VERIFYHOST,false);
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER,false);
+
             curl_setopt($curl, CURLOPT_USERAGENT , "Mozilla/5.0 (Windows; U; Windows NT 5.1; ru-RU; rv:1.7.12) Gecko/20050919 Firefox/1.0.7");
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
 
@@ -186,6 +317,7 @@ class SearchStatsController extends Controller {
 
             curl_close($curl);
         }else echo $this->_ya_cr("Сантехника Воронеж",193)->html();
+        //}else echo $this->_google_cr("Сантехника Воронеж")->html();
     }
     /**
      * @param $text
@@ -193,26 +325,10 @@ class SearchStatsController extends Controller {
      * @return Crawler
      */
     private function _ya_cr($text,$city_id=0){
-        $params=array('text'=>urlencode($text));
-        if($city_id)$params['lr']=$city_id;
-        return $this->_curl_cr('yandex.ru/yandsearch',$params);
-    }
-    /**
-     * @param $text
-     * @return Crawler
-     */
-    private function _google_cr($text){
-        $params=array('q'=>urlencode($text));
-        return $this->_curl_cr('www.google.ru/search',$params);
-    }
+        $arParams=array('text'=>urlencode($text));
+        if($city_id)$arParams['lr']=$city_id;
 
-
-    /**
-     * @param $site
-     * @param $arParams
-     * @return Crawler
-     */
-    private function _curl_cr($site,$arParams){
+        $site='yandex.ru/yandsearch';
         $url="http://$site";
         $first=true;
         foreach($arParams as $key=>$val){
@@ -224,6 +340,7 @@ class SearchStatsController extends Controller {
         }
         $ch=curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
+        curl_setopt($ch, CURLOPT_BINARYTRANSFER,true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST,false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,false);
 
@@ -232,9 +349,67 @@ class SearchStatsController extends Controller {
 
         curl_setopt($ch, CURLOPT_COOKIEFILE, $this->cookiePath);
         curl_setopt($ch, CURLOPT_COOKIEJAR, $this->cookiePath);
+
         $out=curl_exec($ch);
+        //if($out==false)dd(curl_error($ch));
         curl_close($ch);
         $data = ($out==false)?new Crawler():new Crawler($out);
         return $data;
+    }
+    /**
+     * @param $text
+     * @return Crawler
+     */
+    private function _google_cr($text){
+        $arParams=array('q'=>urlencode($text));
+
+        $site='www.google.ru/search';
+        $url="http://$site";
+        $first=true;
+        foreach($arParams as $key=>$val){
+            if($first){
+                $url.='?';
+                $first=false;
+            }else $url.='&';
+            $url.="$key=$val";
+        }
+        $ch=curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
+        curl_setopt($ch, CURLOPT_BINARYTRANSFER,true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST,false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,false);
+        curl_setopt($ch, CURLOPT_TIMEOUT,15);
+
+        /*curl_setopt($ch, CURLOPT_PROXY, $this->_get_proxy());
+        curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);*/
+
+        //curl_setopt($ch, CURLOPT_USERAGENT , $this->_get_agent());
+        curl_setopt($ch, CURLOPT_USERAGENT , "Mozilla/5.0 (Windows; U; Windows NT 5.1; ru-RU; rv:1.7.12) Gecko/20050919 Firefox/1.0.7");
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+
+        $out=curl_exec($ch);
+        //if($out==false)dd(curl_error($ch));
+        curl_close($ch);
+        $data = ($out==false)?new Crawler():new Crawler($out);
+        return $data;
+    }
+
+    private function _init_proxy(){
+        $this->proxyPos=rand(0,$this->proxyCount-1);
+    }
+
+    private function _init_agent(){
+        $this->agentPos=rand(0,$this->agentCount-1);
+    }
+
+    private function _get_proxy(){
+        $proxy=$this->proxyList[$this->proxyPos];
+        $ip=$proxy->proxy_ip;
+        $port=$proxy->proxy_port;
+        return "$ip:$port";
+    }
+
+    private function _get_agent(){
+        return $this->agentList[$this->agentPos];
     }
 }

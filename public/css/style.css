@@ -111,6 +111,9 @@ body >.container-fluid {
 .cdek-form .cdek-group input.long{
     width: 240%;
 }
+.form__captcha{
+    display: block;
+}
 /*.tab-content {
     background-color: antiquewhite;
 }*/

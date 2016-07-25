@@ -24,7 +24,6 @@ class AjaxFormController extends Controller
         return  view('ajax.registerRDSproblem',['data'=>$data]);
     }
     public function addGoodsProblemTask(Request $request,Task $task,goods_problem $gp){
-
          $arrp=array();
          $arrp['doc']=$request->docnum;
          $arrp['desc']=$request->description;
@@ -83,7 +82,7 @@ class AjaxFormController extends Controller
             $statuses=$bitrix->statusList($task_data->site);
             $taskInfoData = ['data' => $task_data, 'statuses' => $statuses,'clientInfo'=>$clientInfo];
             return view('ajax.taskOrder',$taskInfoData);
-        }elseif($request->type==4) {
+        }elseif($request->type==3) {
             $taskInfoData = ['data' => $task->getByID($request->id, $request->type), 'client' => $client, 'allDoc' => $allClientDocs, 'appealHis' => $appealHistoryArr];
             return view('ajax.taskInfo',$taskInfoData);
         }
