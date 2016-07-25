@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Sr;
 use App\Models\Task;
 use Illuminate\Http\Request;
 
@@ -226,5 +227,19 @@ class PageBuilderController extends Controller
 
     public function login (){
         return view('login');
+    }
+
+    public function searchRating(Request $request, SrController $SR, Sr $model) {
+        $arResult = $SR->getStat($model);
+        $mainData = array('data' => $arResult);
+        $headerData = array('data' => 'header');
+        $leftsidebarData = array('data' => 'leftsidebar');
+        $rightsidebarData = array('data' => 'rightsidebar');
+        return view()->make('main')
+            ->nest('main', 'child.sr', $mainData)
+            ->nest('header', 'child.header', $headerData)
+            ->nest('footer', 'child.footer')
+            ->nest('leftsidebar', 'child.leftsidebar', $leftsidebarData)
+            ->nest('rightsidebar', 'child.rightsidebar', $rightsidebarData);
     }
 }
