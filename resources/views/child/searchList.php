@@ -7,13 +7,13 @@
     </div>
     <div class="form-group row">
         <div class="col-xs-12">
-            <input type="submit" name="date" class="btn btn-default">
+            <input type="submit" name="search" class="btn btn-default">
         </div>
     </div>
 </form>
 <table class="table table-striped">
     <thead> <tr> <th>Запрос</th> <th>Сервис</th> <th>Сайт</th> </tr> </thead>
-    <?php foreach($result as $region=>$cities):?>
+    <?php /*dd($result);*/ foreach($result as $region=>$cities):?>
         <?php foreach($cities as $city=>$queries):?>
             <?php foreach($queries as $query=>$services):?>
                 <?php foreach($services as $service_name=>$service):?>

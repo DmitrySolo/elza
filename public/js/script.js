@@ -130,6 +130,102 @@ $(document).on('submit','#bitrixListForm',
         return false;
     }
 );
+
+var g_log;
+var updLog=function (str) {
+    if(str)g_log+='<br>'+str;
+    $('main.main table').html(g_log);
+    $('main.main').scrollTop(9999999);
+};
+var go=function (result,date,num) {
+    if(result.steps[num]) {
+        var el = result.steps[num];
+        el.date = date;
+        console.log(el);
+        updLog(el.text);
+        //go(result,date,num+1);
+        /*var text = el.text;
+         var city_name = el.city_name;*/
+        $.post({
+            url: '/ajax/runSearchStep',
+            data: el
+        }).always(function (data, status) {
+            if (status != 'success')window.alert(status);
+            else {
+                console.log(data);
+                if (data.error&&data.error.yandex){
+                    if(data.img) {
+                        g_log+=': <b>enter code</b>';
+
+                        var img = $('<img>').attr('src',data.img).addClass('image').addClass('form__captcha');
+                        var key = $('<input>').attr('value',data.key).attr('type','hidden').addClass('form__key');
+                        var retpath = $('<input>').attr('value',data.retpath).attr('type','hidden').addClass('form__retpath');
+                        var code = $('<input>').attr('type','text').addClass('form__rep');
+                        $('main.main table').append(img).append(key).append(retpath).append(code);
+                        $('main.main').scrollTop(9999999);
+                        code.keypress(function(event) {
+                            var keycode = (event.keyCode ? event.keyCode : event.which);
+                            if(keycode == '13'){
+                                $.get({
+                                    url: '/checkcaptcha',
+                                    data: {
+                                        key:$('.form__key').val(),
+                                        retpath:$('.form__retpath').val(),
+                                        rep:$('.form__rep').val()
+                                    }
+                                }).always(function (data, status) {
+                                    if (status != 'success')updLog('Ошибка!');
+                                    go(result,date,num);
+                                });
+                                updLog();
+                            }
+                        }).focus();
+                    }else{
+                        updLog('Повтор операции (ошибка Yandex)...');
+                        go(result,date,num);
+                    }
+                }
+                else if(data.error&&data.error.google){
+                    updLog('Повтор операции (ошибка Google)...');
+                    go(result,date,num);
+                }
+                else {
+                    g_log+=': '+data.status;
+                    go(result,date,num+1);
+                }
+            }
+        });
+    }else{
+        updLog('Подготовка статистических данных...');
+        $.get({
+            url: '/ajax/searchStats',
+            data: result.params
+        }).always(function (data, status) {
+            if (status != 'success')updLog('Ошибка!');
+            else updLog('Готово! ('+data+')');
+        });
+    }
+};
+$(document).on('submit','#searchListForm',
+    function(){
+        $('main.main table').html('Подождите...');
+        $.post({
+            url: '/ajax/searchSteps',
+            data: $('#searchListForm').serializeArray()
+        }).always(function(data,status) {
+            if(status!='success')window.alert(status);
+            else {
+                var result=data;
+                var date=result.date;
+                g_log='Обработка...';
+                go(result,date,0);
+            }
+        });
+
+        return false;
+    }
+);
+
 $(document).on('click','.BitrixModal',
     function(){
         $( "#BitrixContent" ).html('');

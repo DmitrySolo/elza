@@ -186,8 +186,7 @@ class PageBuilderController extends Controller
         if(isset($request->category))$data['category']=$request->category;
         if(isset($request->city))$data['city']=$request->city;
 
-        $result=$search->getResult($data['category'],$data['city']);
-        $search->saveResult($data,$result);
+        $result=$search->getResultHistory([$data['category'],$data['city']]);
 
         $headerData=array('data'=>'header');
         $leftsidebarData=array('data'=>'leftsidebar');
