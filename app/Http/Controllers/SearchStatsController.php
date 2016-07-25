@@ -30,7 +30,9 @@ class SearchStatsController extends Controller {
         $proxy=new ProxyList();
         $this->proxyList=$proxy->getProxyList();
         $this->proxyCount=count($this->proxyList);
-        $agents=file_get_contents("/home/$user/www/elza/additional/user_agent.txt");
+        $agent_path="/home/$user/www/elza/additional/user_agent.txt";
+        if($user=='inadmin')$agent_path="/home/$user/www/elza.in/elza/additional/user_agent.txt";
+        $agents=file_get_contents($agent_path);
         $this->agentList=explode("\n",$agents);
         $this->agentCount=count($this->agentList);
     }
