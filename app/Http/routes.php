@@ -62,10 +62,17 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/ajax/addcdekelem','AjaxFormController@newCDEKelem');
     Route::get('/settask','WelcomeController@setTask');
     Route::get('/rv','TaskController@reviewTasks');
+    Route::post('/ajax/searchSteps','SearchStatsController@getSearchSteps');
+    Route::post('/ajax/runSearchStep','SearchStatsController@runSearchStep');
+    Route::get('/search','PageBuilderController@getSearchResult');
+    Route::get('/ajax/searchStats','SearchStatsController@searchStats');
+    Route::get('/searchman','PageBuilderController@searchManager');
+    Route::post('/searchman','PageBuilderController@searchManager');
+    Route::get('/checkcaptcha','SearchStatsController@yaRestore');
+    Route::post('/checkcaptcha','SearchStatsController@yaRestore');
     Route::get('/rds','PageBuilderController@getRDSList');
     Route::get('/bitrix','PageBuilderController@getBitrixList');
     Route::post('/ajax/changeTaskStatus','AjaxFormController@changeTaskStatus');
     Route::post('/ajax/DoneTask','AjaxFormController@completeTask');
-    Route::get('/search_rating','PageBuilderController@searchRating');
+    Route::get('/print/{number}/print.pdf','CDEKController@orderPrint');
 });
-
