@@ -76,4 +76,3 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/ajax/DoneTask','AjaxFormController@completeTask');
     Route::get('/print/{number}/print.pdf','CDEKController@orderPrint');
 });
-
