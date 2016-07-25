@@ -62,6 +62,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/ajax/addcdekelem','AjaxFormController@newCDEKelem');
     Route::get('/settask','WelcomeController@setTask');
     Route::get('/rv','TaskController@reviewTasks');
+    Route::get('/search_rating','PageBuilderController@searchRating');
     Route::post('/ajax/searchSteps','SearchStatsController@getSearchSteps');
     Route::post('/ajax/runSearchStep','SearchStatsController@runSearchStep');
     Route::get('/search','PageBuilderController@getSearchResult');
