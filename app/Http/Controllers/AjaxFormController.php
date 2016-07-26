@@ -105,7 +105,8 @@ class AjaxFormController extends Controller
                 "Reason" => [],
                 "DeliverySum" => "0",
                 "AddedService" => [],
-                "DeliverySumTotal" => 0
+                "DeliverySumTotal" => 0,
+                "ERROR_CDEK" => $resCdek['ERROR_CDEK']
             ];
         }
         $package=array();
