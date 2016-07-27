@@ -45,6 +45,9 @@ class DocProduct extends Model
             DB::raw('min(price) as min_price'),DB::raw('min(quantity) as min_quantity'))
             ->groupBy('sku')->orderBy('min_quantity','desc')->take(5)->get();
     }
+    function getProducts(){
+        return $this->select('sku')->distinct('sku')->get();
+    }
 
     public function scopeRDC($query,$number){
         $query->where('doc_number','=',$number);
