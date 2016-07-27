@@ -71,7 +71,6 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/searchman','PageBuilderController@searchManager');
     Route::get('/checkcaptcha','SearchStatsController@yaRestore');
     Route::post('/checkcaptcha','SearchStatsController@yaRestore');
-    Route::get('/stats','PageBuilderController@productStats');
     Route::get('/rds','PageBuilderController@getRDSList');
     Route::get('/bitrix','PageBuilderController@getBitrixList');
     Route::post('/ajax/changeTaskStatus','AjaxFormController@changeTaskStatus');

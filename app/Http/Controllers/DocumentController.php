@@ -61,13 +61,19 @@ class DocumentController extends Controller
         $client=new Client();
         $document=new Document();
         $docProduct=new DocProduct();
+        $p_info=new ProductInfoController();
+        $ar_products=array();
         $CSVDocument->open();
         //$i=0;
         while($data=$CSVDocument->getLine()){
             if(empty($data['product_code']))$document->import($data);
-            else $docProduct->import($data);
+            else {
+                $docProduct->import($data);
+                $ar_products[]=$data['product_code'];
+            }
             //if(++$i>10)break;
         }
+        $p_info->updateByArray($ar_products);
         echo 'ok CSVDocument<br>';
 
         $CSVClient->open();
