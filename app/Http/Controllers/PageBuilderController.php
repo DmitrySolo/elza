@@ -48,10 +48,13 @@ class PageBuilderController extends Controller
     public function getRDSList(Request $request,Document $RDS,CDEKController $CDEKController,$filter=null){
         $page=$request->page;
         $prefix='РДС-';
-        if(isset($request->doctype))$prefix='РДИ-';
+        if(isset($request->rdi)&&!isset($request->rds))$prefix='РДИ-';
         if(isset($request->submit)){
-            if (empty($request->number)) $number = $prefix;
-            else $number = $prefix.$request->number;
+            if (!empty($request->number)) $number = $prefix.$request->number;
+            else {
+                if((!isset($request->rdi) || !isset($request->rds)) && (isset($request->rdi) || isset($request->rds))) $number = $prefix;
+                else $number = '';
+            }
             if(!empty($request->dispatch)) {
                 if(empty($number=$CDEKController->getNumberByReturn($request->dispatch,$request->start,$request->finish)))
                     $number=$CDEKController->getNumberByDispatch($request->dispatch);
@@ -201,6 +204,10 @@ class PageBuilderController extends Controller
             ->nest('footer', 'child.footer')
             ->nest('leftsidebar', 'child.leftsidebar',$leftsidebarData)
             ->nest('rightsidebar', 'child.rightsidebar',$rightsidebarData);
+    }
+
+    public function productStats(Request $request,DocProduct $product){
+        dd($product->getProductStats());
     }
 
     public function getBitrixList(Request $request,BitrixController $bitrixController){
