@@ -168,6 +168,15 @@ class AjaxFormController extends Controller
     public function getPVZList(Request $request,CDEKController $cdek){
         if(isset($request->cityID)){
             $pvz=$cdek->getPVZ($request->cityID);
+            parse_str($request->form,$form);
+            $weight=0;
+            foreach ($form['PACKAGES'] as $package){
+                $weight+=intval($package['weight']);
+            }
+            foreach ($pvz as $key=>$p){
+                if(intval($p['WeightMin'])<$weight && intval($p['WeightMax'])>=$weight) continue;
+                else unset($pvz[$key]);
+            }
             return view('ajax.listPVZ',['data'=>$pvz]);
         }
         return '';
