@@ -72,6 +72,9 @@ class Document extends Model
         if(isset($arrFilter['nameLike']) && !empty($arrFilter['nameLike'])){
            $resList->where('name', 'LIKE', '%'.$arrFilter['nameLike'].'%');
         }
+        if(isset($arrFilter['number']) && !empty($arrFilter['number'])){
+            $resList->where('number', 'LIKE', $arrFilter['number'].'%');
+        }
 
         $p1 = date('Y-m').'-01';
         $p2 = date("Y-m-d");
@@ -83,7 +86,7 @@ class Document extends Model
                 $p2 = $arrFilter['period']['finish'];
             }
         }
-     $queryRes= $resList->whereBetween('date', [$p1, $p2])
+        $queryRes=$resList->whereBetween('date', [$p1, $p2])
             ->skip(($page-1)*$this->perPage)->take($this->perPage)
             ->get();
         return array('query'=>$queryRes,'cities'=>$cities);

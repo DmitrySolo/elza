@@ -47,8 +47,11 @@ class PageBuilderController extends Controller
     }
     public function getRDSList(Request $request,Document $RDS,CDEKController $CDEKController,$filter=null){
         $page=$request->page;
+        $prefix='РДС-';
+        if(isset($request->doctype))$prefix='РДИ-';
         if(isset($request->submit)){
-            if (!empty($request->number)) $number = 'РДС-' . $request->number; else $number = '';
+            if (empty($request->number)) $number = $prefix;
+            else $number = $prefix.$request->number;
             if(!empty($request->dispatch)) {
                 if(empty($number=$CDEKController->getNumberByReturn($request->dispatch,$request->start,$request->finish)))
                     $number=$CDEKController->getNumberByDispatch($request->dispatch);
@@ -60,9 +63,9 @@ class PageBuilderController extends Controller
             $filter['data'] = array(
                 'city' => $request->city,
                 'author' => $request->author,
-                'number' => $number
             );
             $filter['nameLike'] = $request->name;
+            $filter['number'] = $number;
             $list = $RDS->getList($page, $filter);
         }else {
             $filter=array();

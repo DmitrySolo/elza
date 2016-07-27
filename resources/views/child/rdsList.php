@@ -21,7 +21,8 @@
     <div class="form-group row">
 
         <div class="col-xs-3"><label><input placeholder="Автор" type="text" name="author" class="form-control" <?php if(isset($_GET['author'])&&!empty($_GET['author'])) echo "value='{$_GET['author']}'";?>></label></div>
-        <div class="col-xs-8 col-xs-push-6"><input type="submit" name="submit" class="btn btn-default"></div>
+        <div class="col-xs-3 col-xs-push-3"><input type="submit" name="submit" class="btn btn-default"></div>
+        <div class="col-xs-3 col-xs-push-6"><label><input type="checkbox" name="doctype" value="rds" <?php if(isset($_GET['doctype'])&&!empty($_GET['doctype'])) echo "checked";?>>&nbsp;РДИ/РДС</label></div>
     </div>
 </form>
 <table id="myTable"  class="table table-striped tablesorter">

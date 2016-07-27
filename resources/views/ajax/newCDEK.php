@@ -84,36 +84,6 @@
                 </div>
             </div>
         </div>
-        <div class="cdek-group options">
-            <h3>Настройки доставки</h3>
-            <div class="form-group">
-                <div class="col-xs-6">
-                    <label>
-                        <select name="tariff" class="form-control">
-                            <option value="">Выберите тариф</option>
-                            <option value="63">Магистральный супер-экспресс склад-склад</option>
-                            <option value="136">Посылка склад-склад</option>
-                        </select>
-                    </label>
-                </div>
-                <div class="col-xs-6 cdek-pvz"></div>
-            </div>
-            <div class="checkbox">
-                <div class="col-xs-6">
-                    <label>Скан документов</label>
-                </div>
-            </div>
-            <div class="checkbox">
-                <div class="col-xs-6">
-                    <label><input type="checkbox" name="SERVICES[]" value="37" checked>Осмотр вложения</label>
-                </div>
-            </div>
-            <div class="checkbox">
-                <div class="col-xs-6">
-                    <label><input type="checkbox" name="SERVICES[]" value="36">Частичная доставка</label>
-                </div>
-            </div>
-        </div>
         <div class="cdek-group who">
             <h3>Клиент</h3>
             <div class="form-group">
@@ -169,6 +139,36 @@
             <div class="form-group">
                 <div class="col-xs-4">
                     <a class="package-add" href="#" data-package="<?=$packagenum?>">Добавить комплект</a>
+                </div>
+            </div>
+        </div>
+        <div class="cdek-group options">
+            <h3>Настройки доставки</h3>
+            <div class="form-group">
+                <div class="col-xs-6">
+                    <label>
+                        <select name="tariff" class="form-control">
+                            <option value="">Выберите тариф</option>
+                            <option value="63">Магистральный супер-экспресс склад-склад</option>
+                            <option value="136">Посылка склад-склад</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="col-xs-6 cdek-pvz"></div>
+            </div>
+            <div class="checkbox">
+                <div class="col-xs-6">
+                    <label>Скан документов</label>
+                </div>
+            </div>
+            <div class="checkbox">
+                <div class="col-xs-6">
+                    <label><input type="checkbox" name="SERVICES[]" value="37" checked>Осмотр вложения</label>
+                </div>
+            </div>
+            <div class="checkbox">
+                <div class="col-xs-6">
+                    <label><input type="checkbox" name="SERVICES[]" value="36">Частичная доставка</label>
                 </div>
             </div>
         </div>

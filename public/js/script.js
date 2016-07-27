@@ -282,16 +282,22 @@ $(document).on('click','.product-add',
 );
 var getPVZ=function(){
     var city=$('.cdek-city-select').val();
+    var form=$('.cdek-form').serialize();
     $.ajax({
             method: "POST",
             url: "/ajax/pvzlist",
-            data: { cityID: city }
+            data: { cityID: city , form: form }
         })
         .always(function( html,status,err ) {
             if(status!='success')$( ".cdek-pvz" ).html(err);
             else $( ".cdek-pvz" ).html(html);
         });
 };
+$(document).on('change','.form-group.package input',
+    function(){
+        getPVZ();
+    }
+);
 $(document).on('click','.newCDEKmodal',
     function(){
         var rds=$(this).data('rds');

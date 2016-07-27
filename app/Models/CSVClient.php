@@ -23,7 +23,7 @@ class CSVClient extends Model{
         }
         $arResult=array();
         foreach($this->head as $num=>$key){
-            $arResult[$key]=$arr[$num];
+            $arResult[$key]=isset($arr[$num])?$arr[$num]:'';
         }
         return $arResult;
     }
