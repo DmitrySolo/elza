@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ProductInfo;
+use App\Models\ProductInfoCategory;
 use App\Models\Sr;
 use App\Models\Task;
 use Illuminate\Http\Request;
@@ -206,8 +208,22 @@ class PageBuilderController extends Controller
             ->nest('rightsidebar', 'child.rightsidebar',$rightsidebarData);
     }
 
-    public function productStats(Request $request,DocProduct $product){
-        dd($product->getProductStats());
+    public function productStats(Request $request,ProductInfoCategory $category,ProductInfo $brand){
+        $form['dateFirst']=isset($request->dateFirst)?$request->dateFirst:'';
+        $form['dateLast']=isset($request->dateLast)?$request->dateLast:'';
+
+        $control=new ProductInfoController();
+        $stats=$control->getStats($form['dateFirst'],$form['dateLast'],$category,$brand);
+
+        $headerData=array('data'=>'header');
+        $leftsidebarData=array('data'=>'leftsidebar');
+        $rightsidebarData=array('data'=>'rightsidebar');
+        return view()->make('main')
+            ->nest('main','child.searchStats',['data'=>$stats,'form'=>$form])
+            ->nest('header', 'child.header',$headerData)
+            ->nest('footer', 'child.footer')
+            ->nest('leftsidebar', 'child.leftsidebar',$leftsidebarData)
+            ->nest('rightsidebar', 'child.rightsidebar',$rightsidebarData);
     }
 
     public function getBitrixList(Request $request,BitrixController $bitrixController){
