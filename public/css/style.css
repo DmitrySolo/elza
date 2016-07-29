@@ -114,6 +114,10 @@ body >.container-fluid {
 .form__captcha{
     display: block;
 }
+
+ul.stats{
+    list-style-type: none;
+}
 /*.tab-content {
     background-color: antiquewhite;
 }*/

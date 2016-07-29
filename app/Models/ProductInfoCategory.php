@@ -5,27 +5,32 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use DB;
 
-class ProductInfo extends Model
+class ProductInfoCategory extends Model
 {
-    function getProducts(){
+    function getCategories(){
         return $this->get();
     }
 
-    function newProduct($params){
-        if($this->where('sku',$params['sku'])->count()==0)
-            $this->insert($params);
+    function newCategory($name){
+        if($this->where('info_category',$name)->count()==0)
+            $this->insert(['info_category'=>$name]);
+    }
+
+    function clear(){
+        $this->truncate();
     }
 
     function getProductStats($dateFirst,$dateLast){
-        return $this->select( 'product_infos.brand',
+        return $this->select( 'product_info_categories.info_category',
             DB::raw('sum(doc_products.price*doc_products.quantity) as sum_price'), DB::raw('sum(doc_products.quantity) as sum_quantity')/*,
             DB::raw('avg(doc_products.price) as avg_price'),DB::raw('max(doc_products.price*doc_products.quantity) as max_price'),
             DB::raw('max(doc_products.quantity) as max_quantity'),
             DB::raw('min(doc_products.price) as min_price'),DB::raw('min(doc_products.quantity) as min_quantity')*/)
+            ->join('product_infos', 'product_infos.category', 'LIKE', DB::raw( "CONCAT(product_info_categories.info_category, '%')" ))
             ->join('doc_products', 'product_infos.sku', '=', 'doc_products.sku')
             ->join('documents', 'doc_products.doc_number', '=', 'documents.number')
             ->date($dateFirst,$dateLast)
-            ->groupBy('product_infos.brand')->orderBy('sum_price','desc')->get();
+            ->groupBy('product_info_categories.info_category')->orderBy('product_info_categories.info_category','asc')->get();
     }
 
     function scopeDate($query,$dateFirst,$dateLast){

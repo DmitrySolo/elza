@@ -39,12 +39,6 @@ class DocProduct extends Model
         );
     }
 
-    function getProductStats(){
-        return $this->select('sku','product_name',DB::raw('sum(price*quantity) as sum_price'),DB::raw('sum(quantity) as sum_quantity'),
-            DB::raw('avg(price) as avg_price'),DB::raw('max(price*quantity) as max_price'),DB::raw('max(quantity) as max_quantity'),
-            DB::raw('min(price) as min_price'),DB::raw('min(quantity) as min_quantity'))
-            ->groupBy('sku')->orderBy('min_quantity','desc')->take(5)->get();
-    }
     function getProducts(){
         return $this->select('sku')->distinct('sku')->get();
     }
