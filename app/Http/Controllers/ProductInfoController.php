@@ -54,8 +54,8 @@ class ProductInfoController extends Controller
     }
     function getStats($dateFirst,$dateLast,ProductInfoCategory $category,ProductInfo $brand){
         $stats=array();
-        $stats['category_all']=['sum_price'=>0,'sum_quantity'=>0];
-        $stats['brand_all']=['sum_price'=>0,'sum_quantity'=>0];
+        $stats['category_all']=['sum_price'=>0,'sum_quantity'=>0,'profit'=>0];
+        $stats['brand_all']=['sum_price'=>0,'sum_quantity'=>0,'profit'=>0];
         $data=$category->getProductStats($dateFirst,$dateLast);
         foreach ($data as $item){
             $head=$item->info_category;
@@ -65,6 +65,7 @@ class ProductInfoController extends Controller
             if($head==$item->info_category){
                 $stats['category_all']['sum_price']+=$item->sum_price;
                 $stats['category_all']['sum_quantity']+=$item->sum_quantity;
+                $stats['category_all']['profit']+=$item->profit;
             }
         }
         $data=$brand->getProductStats($dateFirst,$dateLast);
@@ -73,6 +74,7 @@ class ProductInfoController extends Controller
             $stats['brand'][]=$item;
             $stats['brand_all']['sum_price']+=$item->sum_price;
             $stats['brand_all']['sum_quantity']+=$item->sum_quantity;
+            $stats['brand_all']['profit']+=$item->profit;
         }
         return $stats;
     }

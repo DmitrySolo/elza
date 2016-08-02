@@ -219,7 +219,7 @@ class PageBuilderController extends Controller
         $leftsidebarData=array('data'=>'leftsidebar');
         $rightsidebarData=array('data'=>'rightsidebar');
         return view()->make('main')
-            ->nest('main','child.searchStats',['data'=>$stats,'form'=>$form])
+            ->nest('main','child.productStats',['data'=>$stats,'form'=>$form])
             ->nest('header', 'child.header',$headerData)
             ->nest('footer', 'child.footer')
             ->nest('leftsidebar', 'child.leftsidebar',$leftsidebarData)

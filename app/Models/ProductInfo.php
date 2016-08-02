@@ -18,7 +18,8 @@ class ProductInfo extends Model
 
     function getProductStats($dateFirst,$dateLast){
         return $this->select( 'product_infos.brand',
-            DB::raw('sum(doc_products.price*doc_products.quantity) as sum_price'), DB::raw('sum(doc_products.quantity) as sum_quantity')/*,
+            DB::raw('sum(doc_products.price*doc_products.quantity) as sum_price'), DB::raw('sum(doc_products.quantity) as sum_quantity'),
+            DB::raw('sum((doc_products.price*doc_products.quantity)-doc_products.base_price) as profit')/*,
             DB::raw('avg(doc_products.price) as avg_price'),DB::raw('max(doc_products.price*doc_products.quantity) as max_price'),
             DB::raw('max(doc_products.quantity) as max_quantity'),
             DB::raw('min(doc_products.price) as min_price'),DB::raw('min(doc_products.quantity) as min_quantity')*/)

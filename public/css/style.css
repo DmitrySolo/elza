@@ -117,6 +117,7 @@ body >.container-fluid {
 
 ul.stats{
     list-style-type: none;
+    padding: 0;
 }
 /*.tab-content {
     background-color: antiquewhite;
