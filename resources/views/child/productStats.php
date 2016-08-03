@@ -19,9 +19,7 @@
             <th>№</th><th>Категория</th><th>Сумма</th><th>Количество</th><th>Профит</th><th>% профита</th><th>Ср. профит</th>
         </tr>
     </thead>
-    <?//dd($data)
-    $n=0;
-    ?>
+    <?$n=0?>
         <?php foreach($data['category'] as $head=>$categories):?>
             <tr class="success"><td><?=++$n?>.</td><td><?=$head?></td><td></td><td></td><td></td><td></td><td></td></tr>
             <tr>
