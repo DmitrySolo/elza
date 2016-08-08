@@ -20,7 +20,7 @@ class ProductInfoCategory extends Model
         $this->truncate();
     }
 
-    function getProductStats($dateFirst,$dateLast){
+    function getProductStats($dateFirst,$dateLast,$city){
         return $this->select( 'product_info_categories.info_category',
             DB::raw('sum(doc_products.price*doc_products.quantity) as sum_price'), DB::raw('sum(doc_products.quantity) as sum_quantity'),
             DB::raw('sum((doc_products.price*doc_products.quantity)-doc_products.base_price) as profit')/*,
@@ -30,7 +30,9 @@ class ProductInfoCategory extends Model
             ->join('product_infos', 'product_infos.category', 'LIKE', DB::raw( "CONCAT(product_info_categories.info_category, '%')" ))
             ->join('doc_products', 'product_infos.sku', '=', 'doc_products.sku')
             ->join('documents', 'doc_products.doc_number', '=', 'documents.number')
+            ->join('clients', 'documents.client_id', '=', 'clients.id')
             ->date($dateFirst,$dateLast)
+            ->city($city)
             ->groupBy('product_info_categories.info_category')->orderBy('product_info_categories.info_category','asc')->get();
     }
 
@@ -41,5 +43,9 @@ class ProductInfoCategory extends Model
             $query->where('documents.date','>=',$dateFirst);
         if(!empty($dateFirst)&&!empty($dateLast))
             $query->where('documents.date','>=',$dateFirst)->where('documents.date','<=',$dateLast);
+    }
+
+    function scopeCity($query,$city){
+        if($city!='!empty!') $query->where('clients.city',$city);
     }
 }

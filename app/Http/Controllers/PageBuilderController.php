@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use App\Models\ProductInfo;
 use App\Models\ProductInfoCategory;
 use App\Models\Sr;
@@ -208,18 +209,22 @@ class PageBuilderController extends Controller
             ->nest('rightsidebar', 'child.rightsidebar',$rightsidebarData);
     }
 
-    public function productStats(Request $request,ProductInfoCategory $category,ProductInfo $brand){
+    public function productStats(Request $request,ProductInfoCategory $category,ProductInfo $brand,Client $client){
         $form['dateFirst']=isset($request->dateFirst)?$request->dateFirst:'';
         $form['dateLast']=isset($request->dateLast)?$request->dateLast:'';
+        $form['city']=isset($request->city)?$request->city:'!empty!';
+
+        $cl= new Client();
+        $cities=$cl->getCities();
 
         $control=new ProductInfoController();
-        $stats=$control->getStats($form['dateFirst'],$form['dateLast'],$category,$brand);
+        $stats=$control->getStats($form['dateFirst'],$form['dateLast'],$form['city'],$category,$brand,$client);
 
         $headerData=array('data'=>'header');
         $leftsidebarData=array('data'=>'leftsidebar');
         $rightsidebarData=array('data'=>'rightsidebar');
         return view()->make('main')
-            ->nest('main','child.productStats',['data'=>$stats,'form'=>$form])
+            ->nest('main','child.productStats',['data'=>$stats,'form'=>$form,'cities'=>$cities])
             ->nest('header', 'child.header',$headerData)
             ->nest('footer', 'child.footer')
             ->nest('leftsidebar', 'child.leftsidebar',$leftsidebarData)
