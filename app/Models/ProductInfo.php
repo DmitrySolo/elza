@@ -16,7 +16,7 @@ class ProductInfo extends Model
             $this->insert($params);
     }
 
-    function getProductStats($dateFirst,$dateLast){
+    function getProductStats($dateFirst,$dateLast,$city){
         return $this->select( 'product_infos.brand',
             DB::raw('sum(doc_products.price*doc_products.quantity) as sum_price'), DB::raw('sum(doc_products.quantity) as sum_quantity'),
             DB::raw('sum((doc_products.price*doc_products.quantity)-doc_products.base_price) as profit')/*,
@@ -25,7 +25,9 @@ class ProductInfo extends Model
             DB::raw('min(doc_products.price) as min_price'),DB::raw('min(doc_products.quantity) as min_quantity')*/)
             ->join('doc_products', 'product_infos.sku', '=', 'doc_products.sku')
             ->join('documents', 'doc_products.doc_number', '=', 'documents.number')
+            ->join('clients', 'documents.client_id', '=', 'clients.id')
             ->date($dateFirst,$dateLast)
+            ->city($city)
             ->groupBy('product_infos.brand')->orderBy('sum_price','desc')->get();
     }
 
@@ -36,5 +38,9 @@ class ProductInfo extends Model
             $query->where('documents.date','>=',$dateFirst);
         if(!empty($dateFirst)&&!empty($dateLast))
             $query->where('documents.date','>=',$dateFirst)->where('documents.date','<=',$dateLast);
+    }
+
+    function scopeCity($query,$city){
+        if($city!='!empty!') $query->where('clients.city',$city);
     }
 }

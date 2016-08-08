@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class Client extends Model
 {
@@ -44,5 +45,24 @@ class Client extends Model
     }
     public function getCities(){
        return $res=$this->select('city')->distinct()->get();
+    }
+
+    function getProductStats($dateFirst,$dateLast){
+        return $this->select( 'clients.city',
+            DB::raw('sum(doc_products.price*doc_products.quantity) as sum_price'), DB::raw('sum(doc_products.quantity) as sum_quantity'),
+            DB::raw('sum((doc_products.price*doc_products.quantity)-doc_products.base_price) as profit'))
+            ->join('documents', 'clients.id', '=', 'documents.client_id')
+            ->join('doc_products', 'documents.number', '=', 'doc_products.doc_number')
+            ->date($dateFirst,$dateLast)
+            ->groupBy('clients.city')->orderBy('sum_price','desc')->get();
+    }
+
+    function scopeDate($query,$dateFirst,$dateLast){
+        if(empty($dateFirst)&&!empty($dateLast))
+            $query->where('documents.date','<=',$dateLast);
+        if(!empty($dateFirst)&&empty($dateLast))
+            $query->where('documents.date','>=',$dateFirst);
+        if(!empty($dateFirst)&&!empty($dateLast))
+            $query->where('documents.date','>=',$dateFirst)->where('documents.date','<=',$dateLast);
     }
 }

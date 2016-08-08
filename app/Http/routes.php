@@ -56,6 +56,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/ajax/getforbitrix','AjaxFormController@getBitrix');
     Route::get('/bishtrix','BitrixController@getNewO');
     Route::get('/docupd','DocumentController@import');
+    //Route::get('/docupd','ProductInfoController@updateProducts');
     Route::get('/addcdek','PageBuilderController@newCDEK');
     Route::post('/addcdek','PageBuilderController@newCDEK');
     Route::post('/ajax/addcdek','AjaxFormController@newCDEK');

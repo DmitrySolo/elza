@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use App\Models\DocProduct;
 use App\Models\ProductInfo;
 use App\Models\ProductInfoCategory;
@@ -52,11 +53,12 @@ class ProductInfoController extends Controller
         }
         return $n;
     }
-    function getStats($dateFirst,$dateLast,ProductInfoCategory $category,ProductInfo $brand){
+    function getStats($dateFirst,$dateLast,$city,ProductInfoCategory $category,ProductInfo $brand,Client $client){
         $stats=array();
         $stats['category_all']=['sum_price'=>0,'sum_quantity'=>0,'profit'=>0];
         $stats['brand_all']=['sum_price'=>0,'sum_quantity'=>0,'profit'=>0];
-        $data=$category->getProductStats($dateFirst,$dateLast);
+        $stats['city_all']=['sum_price'=>0,'sum_quantity'=>0,'profit'=>0];
+        $data=$category->getProductStats($dateFirst,$dateLast,$city);
         foreach ($data as $item){
             $head=$item->info_category;
             preg_match("/(.+?)\//", $head,$matches);
@@ -68,13 +70,21 @@ class ProductInfoController extends Controller
                 $stats['category_all']['profit']+=$item->profit;
             }
         }
-        $data=$brand->getProductStats($dateFirst,$dateLast);
 
+        $data=$brand->getProductStats($dateFirst,$dateLast,$city);
         foreach ($data as $item){
             $stats['brand'][]=$item;
             $stats['brand_all']['sum_price']+=$item->sum_price;
             $stats['brand_all']['sum_quantity']+=$item->sum_quantity;
             $stats['brand_all']['profit']+=$item->profit;
+        }
+
+        $data=$client->getProductStats($dateFirst,$dateLast);
+        foreach ($data as $item){
+            $stats['city'][]=$item;
+            $stats['city_all']['sum_price']+=$item->sum_price;
+            $stats['city_all']['sum_quantity']+=$item->sum_quantity;
+            $stats['city_all']['profit']+=$item->profit;
         }
         return $stats;
     }
