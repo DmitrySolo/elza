@@ -19,7 +19,11 @@
         </div>
     </div>
 </form>
-<h2>Анализ результатов по категориям</h2>
+<?php
+$cityMessage='';
+if($form['city']!='!empty!')$cityMessage=' (город '.$form['city'].')';
+?>
+<h2>Анализ результатов по категориям<?=$cityMessage?></h2>
 <?if(isset($data['category'])):?>
 <table class="table table-bordered">
     <thead>
@@ -100,7 +104,7 @@
 <?php else: ?>
     <h3>нет данных</h3>
 <?php endif; ?>
-<h2>Анализ результатов по брендам</h2>
+<h2>Анализ результатов по брендам<?=$cityMessage?></h2>
 <?if(isset($data['brand'])):?>
 <table class="table table-bordered">
     <thead>
