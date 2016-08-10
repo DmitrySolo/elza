@@ -27,12 +27,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->call(function () {
+        /*$schedule->call(function () {
             $model=new Task();
             $bitrix=new BitrixController();
             $model->reviewBitrix($bitrix->getLastOrders());
             $model->reviewBitrix($bitrix->getLastOrders('ove-cfo.ru'));
-        })->everyFiveMinutes();
+        })->everyFiveMinutes();*/
         $schedule->call(function () {
             $doc=new DocumentController();
             $doc->import();
