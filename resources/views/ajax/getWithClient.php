@@ -46,7 +46,7 @@
                             <option value="300">5 часов</option>
                             <option value="360">6 часов</option>
                             <option value="480">В течении 24 часов</option>
-                            <option value="960">В течении 48 часов</option>
+                            <option value="960" selected>В течении 48 часов</option>
                             <option value="1520">В течении 3х рабочих дней</option>
                             <option value="1920">В течении 4 рабочих дней</option>
                             <option value="2400">В течении 5 рабочих дней</option>
