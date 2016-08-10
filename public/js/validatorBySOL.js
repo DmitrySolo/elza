@@ -4,7 +4,7 @@ var notReqStyles={
 var ReqStyles={
     border:""
 };
-var sendData =  {}
+var sendData =  {};
 
 function solValidate(formChilds){
     var isvalid=true;
@@ -15,18 +15,17 @@ function solValidate(formChilds){
                 $(this).css(notReqStyles);
                 isvalid = false
             }if($(this).data('minlength')){
-                console.log($(this).val().length)
+                console.log($(this).val().length);
                 if($(this).data('minlength')>$(this).val().length){
                     $(this).css(notReqStyles);
                     isvalid = false
                 }
             }
         }
-        var name= $(this).attr("name")
-        var val=$(this).val()
-        sendData[name] = val;
+        var name= $(this).attr("name");
+        sendData[name] = $(this).val();
         console.log(sendData);
-    })
+    });
     return isvalid
 }
 $(document).on('click',".validateAndSend",
@@ -34,19 +33,20 @@ $(document).on('click',".validateAndSend",
 
         var formId=$(this).data('form');
         var url=$(this).data('url');
+        var content=$(this).data('content');
         var formInputs=$('#'+formId+' [name]');
         console.log(formInputs);
         //solValidate(textareas);
 
         if(solValidate(formInputs)) {
-            console.log('Sended!!!')
+            console.log('Sended!!!');
             $.ajax({
                     method: "POST",
                     url: url,
                     data: sendData
                 })
                 .done(function (html) {
-                    $("#newCDEKContent").html(html);
+                    $(content).html(html);
                 });
         }
     }
