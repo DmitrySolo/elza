@@ -66,7 +66,7 @@
                             <option value="2400">В течении 5 рабочих дней</option>
                         </select>
                     </form>
-                    <div><button  class="validateAndSend" data-form="TaskForm" data-url="/ajax/delayTask">ОК</button></div>
+                    <div><button  class="validateAndSend" data-form="TaskForm" data-url="/ajax/delayTask" data-content=".validateAndSend" data-dismiss="modal">ОК</button></div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="profile">
                     <form id="changeStatus">
@@ -103,7 +103,7 @@
                         <option value="2400">В течении 5 рабочих дней</option>
                     </select>
                     </form>
-                    <div><button  class="validateAndSend" data-form="changeStatus" data-url="/ajax/changeTaskStatus">ОК</button></div>
+                    <div><button  class="validateAndSend" data-form="changeStatus" data-url="/ajax/changeTaskStatus" data-content=".validateAndSend" data-dismiss="modal">ОК</button></div>
 
                 </div>
                 <div role="tabpanel" class="tab-pane" id="messages">
@@ -129,7 +129,7 @@
                             <?}?>
                         </div>
                     </form>
-                    <div><button  class="validateAndSend" data-form="DoneTask" data-url="/ajax/DoneTask">ОК</button></div>
+                    <div><button  class="validateAndSend" data-form="DoneTask" data-url="/ajax/DoneTask" data-content=".validateAndSend" data-dismiss="modal">ОК</button></div>
                 </div>
             </div>
 
