@@ -26,7 +26,7 @@
        <p class="task-status"><? echo 'Статус: '.$data->step_description; ?></p>
         <p>Находиться в ожидании: <? echo $data->waiting." минут"; ?><small>(Добавлена:<? echo $data->at_; ?>)</small></p>
         <p>Последнее действие: <? echo $data->step_reason; ?></p>
-        <p>Описание проблемы: <? echo $data->description; ?></p>
+        <p class="task-problem">Описание проблемы: <? echo $data->description; ?></p>
         <?if(isset($data->document_id)){?>
         <p>Проблема поступила по накладной:  <a class="showALLbyRDS" href="#allAboutRDS" data-rds="<? echo $data->document_id; ?>"><? echo $data->document_id; ?></a></p>
         <?}?>
@@ -122,6 +122,7 @@
                             <?}else{?>
                                 <select class="form-control" name="DoneTask" required>
                                     <option value="Клиент отозвал заявку">Клиент отозвал заявку</option>
+                                    <option value="Отказ в удовлетворении">Отказ в удовлетворении</option>
                                     <option value="Клиенту были возвращены средства">Клиенту были возвращены средства</option>
                                     <option value="Клиенту была произведена замена">Клиенту была произведена замена</option>
                                 </select>

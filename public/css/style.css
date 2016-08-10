@@ -66,6 +66,10 @@ body >.container-fluid {
 .modalTaskInfo{
     width: 1200px;
 }
+p.task-problem{
+    background-color: #f1a899;
+    padding: 3px;
+}
 
 .cdek-form .form-control{
     padding: 1px;
