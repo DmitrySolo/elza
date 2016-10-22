@@ -114,6 +114,9 @@ body >.container-fluid {
 .form__captcha{
     display: block;
 }
+.form-inline {
+    background-color: #F5F5DC;
+}
 /*.tab-content {
     background-color: antiquewhite;
 }*/

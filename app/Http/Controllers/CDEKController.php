@@ -91,6 +91,7 @@ class CDEKController extends Controller
             );
         }
         $report=$this->_getCDEK($this->_status_report($arReport));
+        //dd($report);
         if(isset($report['Order'])) {
             $arInfo = array();
             if (isset($report['Order']['@attributes'])) $report['Order'] = array($report['Order']);

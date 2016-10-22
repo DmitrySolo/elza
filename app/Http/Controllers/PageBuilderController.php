@@ -47,7 +47,9 @@ class PageBuilderController extends Controller
     }
     public function getRDSList(Request $request,Document $RDS,CDEKController $CDEKController,$filter=null){
         $page=$request->page;
-        $prefix='РДС-';
+        $costDel = 0;
+        $product = new DocProduct();
+        $prefix='РДС-';//По умолчанию только рдс
         if(isset($request->doctype))$prefix='РДИ-';
         if(isset($request->submit)){
             if (empty($request->number)) $number = $prefix;
@@ -55,7 +57,7 @@ class PageBuilderController extends Controller
             if(!empty($request->dispatch)) {
                 if(empty($number=$CDEKController->getNumberByReturn($request->dispatch,$request->start,$request->finish)))
                     $number=$CDEKController->getNumberByDispatch($request->dispatch);
-            }
+            }//Поиск по номеру СДЕКА
             $filter['period'] = array(
                 'start' => $request->start,
                 'finish' => $request->finish,
@@ -69,30 +71,42 @@ class PageBuilderController extends Controller
             $list = $RDS->getList($page, $filter);
         }else {
             $filter=array();
-            $list=$RDS->getList($page,$filter);
+            $list=$RDS->getList($page,$filter);//получаем рдэссы
+
         }
 
         $footerData=array(
             'endTotal'=>0,
             'processTotal'=>0,
+            'total_price' =>0,
+            'deliveryServicesCostTotal'=>0,
+            'deliveryTransportCostTotal'=>0,
             'st4'=>0,
             'st5'=>0,
             'st45'=>0,
         );
 
         $rdsList=array();
+        $rdsCount = count($list['query']);
         foreach($list['query'] as $rds){
             $rdsList[]=$rds->number;
         }
+        //dd($rdsList);
+        $DocsByCdek = array();
         if(count($rdsList)) {
-            $lInfo = $CDEKController->getListInfo($rdsList);
-            $goods = $RDS->getWithClientAndGoodsByMultiID($rdsList);
-
+            $lInfo = $CDEKController->getListInfo($rdsList);//отправляем сдэку список из номеров рдс
+           foreach ($lInfo as $key=>$value){
+               $DocsByCdek[] = $key;
+           }
+            $ourShipingList = array_diff($rdsList,$DocsByCdek);
+           // dd($ourShipingList);
+            $goods = $RDS->getWithClientAndGoodsByMultiID($rdsList);// получаем список товаров
+            //dd($lInfo);
             foreach ($goods as $resItem) {
-                if(isset($resCdek['Package']) && !empty($resCdek['Package'])){
-                }
+                //if(isset($resCdek['Package']) && !empty($resCdek['Package'])){}
+                //dd($resItem);
 
-                if (isset($lInfo[$resItem['number']])) {
+                if (isset($lInfo[$resItem['number']])) {//Если через сдэк
                     $package=array();
                     if(isset($lInfo[$resItem['number']]['Package']) && !empty($lInfo[$resItem['number']]['Package'])){
                         foreach ($lInfo[$resItem['number']]['Package'] as $itemq ){
@@ -114,13 +128,17 @@ class PageBuilderController extends Controller
                     if (!isset($lInfo[$resItem['number']]['DeliverySumTotal'])) $lInfo[$resItem['number']]['DeliverySumTotal'] = 400;
                     $delSum = $lInfo[$resItem['number']]['DeliverySumTotal'];
                     if ($lInfo[$resItem['number']]['Status']['Code'] == 5) {
+                        $vozvrat = 2;
                         $lInfo[$resItem['number']]['total_price'] = 0;
                         $lInfo[$resItem['number']]['total_base_price'] = 0;
                         $lInfo[$resItem['number']]['delivery_cost'] = 0;
                     } else {
+                        $vozvrat = 1;
                         if ($resItem['sku'] == 106730) {
                             $lInfo[$resItem['number']]['delivery_cost'] = $resItem['price'];
+                            $costDel = $resItem['price'];
                         } else {
+                            $lInfo[$resItem['number']]['delivery_cost']=0;
                             $lInfo[$resItem['number']]['real_quantity'] = (array_key_exists($resItem['sku'],$package))?$package[$resItem['sku']]:$resItem['quantity'];
                             $lInfo[$resItem['number']]['total_price'] += $resItem['price'] * $lInfo[$resItem['number']]['real_quantity'];
                             $lInfo[$resItem['number']]['total_base_price'] += $resItem['base_price']/* * $lInfo[$resItem['number']]['real_quantity']*/;
@@ -130,19 +148,54 @@ class PageBuilderController extends Controller
                     $lInfo[$resItem['number']]['total'] = $lInfo[$resItem['number']]['total_price']
                         - $lInfo[$resItem['number']]['total_base_price'] - $delSum
                         + $lInfo[$resItem['number']]['delivery_cost'];
+                    $lInfo[$resItem['number']]['totalDel'] = $delSum;
 
                     $lInfo[$resItem['number']]['flag'] = 1;
                 }
+
+
+
+
+
+
+
+
             }
+            $nocdekResultArr = array();
+            foreach ($ourShipingList as $key => $doc){//////////////////////IF NO CDEK!!!!
+                $products = $product->getAll($doc);
+                //print_r($products);
+
+                foreach($products as $item =>$val) {
+
+                    if ($val['sku'] == 106730) {
+                        $costDel = $val['price'];
+                    }
+                    if(!isset($nocdekResultArr[$val->doc_number])){
+                        //dd($val);
+                        $nocdekResultArr[$val->doc_number]['total_price']=$val->price*$val->quantity;
+                        $nocdekResultArr[$val->doc_number]['total_b_price']=$val->base_price;
+                    }
+                    else{   $nocdekResultArr[$val->doc_number]['total_price']+=$val->price*$val->quantity;
+                            $nocdekResultArr[$val->doc_number]['total_b_price']+=$val->base_price;
+                    }
+                }
+                            $nocdekResultArr[$val->doc_number]['total']=$nocdekResultArr[$val->doc_number]['total_price']-$nocdekResultArr[$val->doc_number]['total_b_price']+$costDel;
+            }
+            //dd($nocdekResultArr);
             foreach ($list['query'] as &$rds) {
+               // dd($list['query']);
                 if (isset($lInfo[$rds->number])) {
                     $rds->total = $lInfo[$rds->number]['total'];
+                    $rds->total_d = $lInfo[$rds->number]['total_price']+$costDel;
+                    $rds->totalDelSrvcs = $lInfo[$rds->number]['totalDel'];
                     $rds->status_code = $lInfo[$rds->number]['Status']['Code'];
                     $rds->status_desc=$lInfo[$rds->number]['Status']['Description'];
                     $rds->reason=$lInfo[$rds->number]['Reason']['Description'];
-
+                    $footerData['total_price']+=$rds->total_d;
                     if($rds->status_code==4 || $rds->status_code==5){
                         $footerData['endTotal']+=$rds->total;
+                        $footerData['deliveryServicesCostTotal']+=$rds->totalDelSrvcs;
                         if($rds->status_code==4)$footerData['st4']++;
                         else {$footerData['st5']++;  $lInfo[$rds->number];
                             if(isset($footerData['reason'][$rds->reason]))  $footerData['reason'][$rds->reason]++;
@@ -152,6 +205,17 @@ class PageBuilderController extends Controller
                     }
                     else $footerData['processTotal']+=$rds->total;
                 }
+                else{//IF NO CDEK
+                    $rds->total = $nocdekResultArr[$rds->number]['total'];
+                    $rds->totalDelSrvcs = 0;
+                    $rds->status_code = 777;
+                    $rds->status_desc='ok';
+                    $rds->reason='ok';
+                    $footerData['endTotal']+=$rds->total;
+                    $footerData['total_price']+=$nocdekResultArr[$val->doc_number]['total_price']+$costDel;
+
+                    $footerData['deliveryServicesCostTotal']+=$rds->totalDelSrvcs;
+                }
             }
         }
         if(isset($footerData['reason']))arsort($footerData['reason']);
@@ -160,7 +224,7 @@ class PageBuilderController extends Controller
             $footerData['st4'] = round($footerData['st4'] / $footerData['st45'] * 100, 2);
             $footerData['st5'] = round($footerData['st5'] / $footerData['st45'] * 100, 2);
         }
-
+        $footerData['count_rds'] = $rdsCount;
         $headerData=array('data'=>'header');
         $leftsidebarData=array('data'=>'leftsidebar');
         $rightsidebarData=array('data'=>'rightsidebar');
