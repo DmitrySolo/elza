@@ -6,7 +6,7 @@
  * Time: 16:53
  */
 
-namespace Additional;
+namespace App\Additional;
 use Exception;
 
 

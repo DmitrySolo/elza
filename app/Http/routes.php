@@ -61,6 +61,8 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/addcdek','PageBuilderController@newCDEK');
     Route::post('/ajax/addcdek','AjaxFormController@newCDEK');
     Route::post('/ajax/addcdekelem','AjaxFormController@newCDEKelem');
+    Route::post('/ajax/newcdekcalc','AjaxFormController@newCDEKCalculate');
+    Route::post('/ajax/newcdekbitrixinfo','AjaxFormController@newCDEKBitrixInfo');
     Route::get('/settask','WelcomeController@setTask');
     Route::get('/rv','TaskController@reviewTasks');
     Route::get('/search_rating','PageBuilderController@searchRating');
