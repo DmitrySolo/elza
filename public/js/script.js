@@ -245,21 +245,39 @@ $(document).on('click','.BitrixModal',
         });
     }
 );
+var newCdekCalc=function(){
+    $.ajax({
+        method: "POST",
+        url: "/ajax/newcdekcalc",
+        data: $('.cdek-form').serializeArray()
+    })
+        .always(function( html,status,err ) {
+            if(status!='success')$( ".cdek-calc" ).html(err);
+            else $( ".cdek-calc" ).html(html);
+        });
+};
 $(document).on('click','.package-add',
     function(){
         var pack=$(this).data('package');
         var content=$(this).parent().parent();
         $.ajax({
-                method: "POST",
-                url: "/ajax/addcdekelem",
-                data: { package: pack }
-            })
-            .always(function( html,status,err ) {
-                if(status!='success')window.alert(err);
-                else {
-                    content.replaceWith(html);
-                }
-            });
+            method: "POST",
+            url: "/ajax/addcdekelem",
+            data: { package: pack }
+        })
+        .always(function( html,status,err ) {
+            if(status!='success')window.alert(err);
+            else {
+                content.replaceWith(html);
+                newCdekCalc();
+            }
+        });
+    }
+);
+$(document).on('click','.package-del',
+    function(){
+        $('*[data-package='+$(this).data('package')+']').remove();
+        newCdekCalc();
     }
 );
 $(document).on('click','.product-add',
@@ -268,49 +286,60 @@ $(document).on('click','.product-add',
         var item=$(this).data('item');
         var content=$(this).parent().parent();
         $.ajax({
-                method: "POST",
-                url: "/ajax/addcdekelem",
-                data: { package: pack,item: item }
-            })
-            .always(function( html,status,err ) {
-                if(status!='success')window.alert(err);
-                else {
-                    content.replaceWith(html);
-                }
-            });
+            method: "POST",
+            url: "/ajax/addcdekelem",
+            data: { package: pack,item: item }
+        })
+        .always(function( html,status,err ) {
+            if(status!='success')window.alert(err);
+            else {
+                content.replaceWith(html);
+            }
+        });
     }
 );
 var getPVZ=function(){
     var city=$('.cdek-city-select').val();
     var form=$('.cdek-form').serialize();
     $.ajax({
-            method: "POST",
-            url: "/ajax/pvzlist",
-            data: { cityID: city , form: form }
-        })
-        .always(function( html,status,err ) {
-            if(status!='success')$( ".cdek-pvz" ).html(err);
-            else $( ".cdek-pvz" ).html(html);
-        });
+        method: "POST",
+        url: "/ajax/pvzlist",
+        data: { cityID: city , form: form }
+    })
+    .always(function( html,status,err ) {
+        if(status!='success')$( ".cdek-pvz" ).html(err);
+        else $( ".cdek-pvz" ).html(html);
+    });
 };
 $(document).on('change','.form-group.package input',
     function(){
         getPVZ();
     }
 );
+$(document).on('change','.cdek-form select, .cdek-form .what input',
+    newCdekCalc
+);
 $(document).on('click','.newCDEKmodal',
     function(){
         var rds=$(this).data('rds');
         console.log(rds);
         $.ajax({
+            method: "POST",
+            url: "/ajax/addcdek",
+            data: { rds: rds }
+        })
+        .done(function( html ) {
+            $( "#newCDEKContent" ).html(html);
+            getPVZ();
+            $.ajax({
                 method: "POST",
-                url: "/ajax/addcdek",
+                url: "/ajax/newcdekbitrixinfo",
                 data: { rds: rds }
             })
-            .done(function( html ) {
-                $( "#newCDEKContent" ).html(html);
-                getPVZ();
-            });
+                .done(function( html ) {
+                    $( ".cdek-form .cdek-add-info" ).html(html);
+                });
+        });
     }
 );
 
@@ -349,7 +378,7 @@ $(document).ready(function() {
                     formGroup = input.parents('.form-group'),
                     val = input.val();
 
-                if(input.attr('type')!='checkbox') {
+                if(input.attr('type')!='checkbox' && input.attr('name')!='flat') {
                     if (val.length === 0) {
                         formGroup.addClass('has-error').removeClass('has-success');
                         valid = false;

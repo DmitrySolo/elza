@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\CdekCity;
 use Illuminate\Contracts\Mail\Mailer;
 use App\Models\Client;
 use App\Models\Task;
@@ -183,6 +184,11 @@ class AjaxFormController extends Controller
     }
 
     public function newCDEK(Request $request,Document $doc){
+        $cdekCities=new CdekCity();
+        $cities=$cdekCities->getList();
+
+        $bitrix = new BitrixController();
+
         $input = [
             'Number' => $request->rds,
             'deliveryCost' => 0,
@@ -223,7 +229,7 @@ class AjaxFormController extends Controller
         }
         $packagenum=0;
         if(isset($input['PACKAGES']))$packagenum=count($input['PACKAGES']);
-            $mainData = array('input' => $input,'packagenum' => $packagenum);
+            $mainData = array('input' => $input,'cities'=>$cities,'packagenum' => $packagenum);
         return view('ajax.newCDEK',$mainData);
     }
 
@@ -235,6 +241,20 @@ class AjaxFormController extends Controller
             return view('ajax.newCDEKproduct',['package'=>intval($request->package),'item'=>intval($request->item)]);
         }
         return '';
+    }
+
+    public function newCDEKCalculate(Request $request,CDEKController $controller){
+        //dd($request->all());
+
+        $controller->calculate($request->all());
+    }
+
+    public function newCDEKBitrixInfo(Request $request,BitrixController $bitrix){
+        $data=array();
+        if(isset($request->rds)){
+            $data=$bitrix->searchByRDS($request->rds);
+        }
+        return view('ajax.newCDEKbitrix',['data'=>$data]);
     }
 
     public function getBitrixList(Request $request,BitrixController $bitrixController){

@@ -8,6 +8,8 @@ use Illuminate\Http\Response;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
+use App\CalculatePriceDeliveryCdek;
+
 use Nathanmac\Utilities\Parser\Facades\Parser;
 
 class CDEKController extends Controller
@@ -170,6 +172,74 @@ class CDEKController extends Controller
         $response=$this->_getCDEK($this->_delivery_request($orders));
         return ['response'=>$response,'orders'=>$orders];
     }
+
+    public function calculate($order){
+        try {
+            //$date=date("Y-m-d");
+
+            //создаём экземпляр объекта CalculatePriceDeliveryCdek
+            $calc = new CalculatePriceDeliveryCdek();
+
+            //$account="f6c3b39e4a505d6797b4dc01c6fe0279";
+            //$secure_password="fba640bcdfe840354b69ad2ef222fee5";
+            //$secure=md5("$date&$secure_password");
+            //Авторизация. Для получения логина/пароля (в т.ч. тестового) обратитесь к разработчикам СДЭК -->
+            //$calc->setAuth($account, $secure_password);
+
+            //устанавливаем город-отправитель
+            $calc->setSenderCityId(506);
+            //устанавливаем город-получатель
+            $calc->setReceiverCityId($order['city']);
+            //устанавливаем дату планируемой отправки
+            //$calc->setDateExecute($date);
+
+            //устанавливаем тариф по-умолчанию
+            $calc->setTariffId($order['tariff']);
+            //задаём список тарифов с приоритетами
+            // $calc->addTariffPriority($_REQUEST['tariffList1']);
+            // $calc->addTariffPriority($_REQUEST['tariffList2']);
+
+
+            //устанавливаем режим доставки
+            //$calc->setModeDeliveryId($params['modeId']);
+            //добавляем места в отправление
+
+            foreach($order['PACKAGES'] as $pack_num=>$package){
+                $calc->addGoodsItemBySize($package['weight'], $package['size_a'], $package['size_b'], $package['size_c']);
+            }
+            //$calc->addGoodsItemByVolume($params['weight2'], $params['volume2']);
+
+            if ($calc->calculate() === true) {
+                $res = $calc->getResult();
+
+                echo 'Цена доставки: ' . $res['result']['price'] . 'руб.<br />';
+                echo 'Срок доставки: ' . $res['result']['deliveryPeriodMin'] . '-' .
+                    $res['result']['deliveryPeriodMax'] . ' дн.<br />';
+                echo 'Планируемая дата доставки: c ' . $res['result']['deliveryDateMin'] . ' по ' . $res['result']['deliveryDateMax'] . '.<br />';
+                echo 'id тарифа, по которому произведён расчёт: ' . $res['result']['tariffId'] . '.<br />';
+                if(array_key_exists('cashOnDelivery', $res['result'])) {
+                    echo 'Ограничение оплаты наличными, от (руб): ' . $res['result']['cashOnDelivery'] . '.<br />';
+                }
+            } else {
+                $err = $calc->getError();
+                if( isset($err['error']) && !empty($err) ) {
+                    //var_dump($err);
+                    foreach($err['error'] as $e) {
+                        echo 'Код ошибки: ' . $e['code'] . '.<br />';
+                        echo 'Текст ошибки: ' . $e['text'] . '.<br />';
+                    }
+                }
+            }
+
+            //раскомментируйте, чтобы просмотреть исходный ответ сервера
+            // var_dump($calc->getResult());
+            // var_dump($calc->getError());
+
+        } catch (\Exception $e) {
+            echo 'Ошибка: ' . $e->getMessage() . "<br />";
+        }
+    }
+
     public function basicCDEK($number){
         $arResult=['Number'=>$number];
         $arReport=array(

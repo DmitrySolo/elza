@@ -100,6 +100,13 @@ p.task-problem{
     background-color: #f1a899;
 }
 
+.cdek-group.options select{
+    font-size: 14px;
+    font-weight: 500;
+    height: 30px;
+    max-width: 350px;
+}
+
 .cdek-group label{
     margin-bottom: 0;
 }
@@ -115,8 +122,17 @@ p.task-problem{
 .cdek-form .cdek-group input.long{
     width: 240%;
 }
+.cdek-group label>span{
+    display: block;
+    margin: 0;
+    font-size: 10px;
+    color: #424242;
+}
 .form__captcha{
     display: block;
+}
+.form-inline {
+    background-color: #F5F5DC;
 }
 
 ul.stats{

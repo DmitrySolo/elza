@@ -21,6 +21,18 @@ class BitrixController extends Controller
             'user_address'=>$address
         ));
     }
+    public function searchByRDS($number,$site='www.santehsmart.ru'){
+        $db_rds=new Document();
+        $rds=$db_rds->getWithClient($number);
+        return $this->_bitrix_curl($site,array(
+            //'action'=>'order',
+            'action'=>'search',
+            //'order_id'=>'1002839',
+            'user_name'=>$rds->name,
+            'user_address'=>$rds->address,
+            'user_phone'=>$rds->phone
+        ));
+    }
     public function orders($date_begin,$date_end='',$site='www.santehsmart.ru'){
         $arParams=array(
             'action'=>'list',
@@ -119,8 +131,10 @@ class BitrixController extends Controller
 
     private function _bitrix_curl($site,$arParams){
         $json_send=json_encode($arParams);
-        $ch=curl_init("http://$site/testzone/$json_send/elza.json");
+        $ch=curl_init("http://$site/testzone/elza.json");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, array('json'=>$json_send));
         $out=curl_exec($ch);
         curl_close($ch);
         $data=json_decode($out,true);

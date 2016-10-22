@@ -1,6 +1,6 @@
 <?php
 
-namespace Additional;
+namespace App\Additional;
 
 /**
  * AngryCurl - Anonymized Rolling Curl class

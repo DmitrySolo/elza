@@ -11,7 +11,7 @@ use App\Models\ProxyList;
 use App\Models\SearchHistory;
 use Symfony\Component\DomCrawler\Crawler;
 use Illuminate\Http\Request;
-//use Additional\AngryCurl;
+//use App\Additional\AngryCurl;
 
 class SearchStatsController extends Controller {
 
@@ -30,8 +30,8 @@ class SearchStatsController extends Controller {
         $proxy=new ProxyList();
         $this->proxyList=$proxy->getProxyList();
         $this->proxyCount=count($this->proxyList);
-        $agent_path="/home/$user/www/elza/additional/user_agent.txt";
-        if($user=='inadmin')$agent_path="/home/$user/www/elza.in/elza/additional/user_agent.txt";
+        $agent_path="/home/$user/www/elza/app/additional/user_agent.txt";
+        if($user=='inadmin')$agent_path="/home/$user/www/elza.in/elza/app/additional/user_agent.txt";
         $agents=file_get_contents($agent_path);
         $this->agentList=explode("\n",$agents);
         $this->agentCount=count($this->agentList);
