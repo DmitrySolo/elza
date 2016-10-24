@@ -154,7 +154,7 @@ if($form['city']!='!empty!')$cityMessage=' (город '.$form['city'].')';
                 <td><b><?=number_format($city->profit, 2, ',', ' ')?> руб.</b></td>
                 <td><?=empty($city->sum_price)?0:round($city->profit/$city->sum_price*100,2)?>%</td>
                 <td><b><?=number_format(empty($city->sum_quantity)?0:($city->profit/$city->sum_quantity), 2, ',', ' ')?> руб.</b></td>
-                <td><b><?=number_format(isset($data['cities'][$city->city])?$data['cities'][$city->city]['deliveryServicesCostTotal']:0, 2, ',', ' ')?> руб.</b></td>
+                <td><b><?=number_format(isset($data['cities'][$city->city]['deliveryServicesCostTotal'])?$data['cities'][$city->city]['deliveryServicesCostTotal']:0, 2, ',', ' ')?> руб.</b></td>
                 <td><b><?=number_format(isset($data['cities'][$city->city])?$data['cities'][$city->city]['adv']:0, 2, ',', ' ')?> руб.</b></td>
                 <td style="background-color:#FFF;color: <?=isset($data['cities'][$city->city])?$data['cities'][$city->city]['color']:''?>">
                     <b><?=number_format(isset($data['cities'][$city->city])?$data['cities'][$city->city]['result']:0, 2, ',', ' ')?> руб.</b>

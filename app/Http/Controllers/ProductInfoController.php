@@ -116,15 +116,17 @@ class ProductInfoController extends Controller
                 }
             }
 
+            $delivTotal=isset($stats['cities'][$item->city]['deliveryServicesCostTotal'])?$stats['cities'][$item->city]['deliveryServicesCostTotal']:0;
+
             $stats['cities'][$item->city]['adv']=isset($advList[$item->city])?$advList[$item->city]:0;
-            $stats['cities'][$item->city]['result']=$item->profit-$stats['cities'][$item->city]['deliveryServicesCostTotal']-$stats['cities'][$item->city]['adv'];
+            $stats['cities'][$item->city]['result']=$item->profit-$delivTotal-$stats['cities'][$item->city]['adv'];
             $stats['cities'][$item->city]['color']=($stats['cities'][$item->city]['result']<0)?'red':'green';
 
             $stats['city'][]=$item;
             $stats['city_all']['sum_price']+=$item->sum_price;
             $stats['city_all']['sum_quantity']+=$item->sum_quantity;
             $stats['city_all']['profit']+=$item->profit;
-            $stats['city_all']['delivery']+=$stats['cities'][$item->city]['deliveryServicesCostTotal'];
+            $stats['city_all']['delivery']+=$delivTotal;
             $stats['city_all']['adv']+=$stats['cities'][$item->city]['adv'];
             $stats['city_all']['result']+=$stats['cities'][$item->city]['result'];
         }
