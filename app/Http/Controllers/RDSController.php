@@ -32,4 +32,9 @@ class RDSController extends Controller
 
         }
     }
+
+    public function updateRDSdelivery(Document $RDS){
+        $list=$RDS->getList(1,array());
+        dd($list);
+    }
 }

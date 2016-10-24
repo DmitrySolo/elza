@@ -141,7 +141,7 @@ if($form['city']!='!empty!')$cityMessage=' (город '.$form['city'].')';
     <table class="table table-bordered">
         <thead>
         <tr>
-            <th>№</th><th>Город</th><th>Сумма</th><th>Количество</th><th>Профит</th><th>% профита</th><th>Ср. профит</th>
+            <th>№</th><th>Город</th><th>Сумма</th><th>Количество</th><th>Профит</th><th>% профита</th><th>Ср. профит</th><th>Доставка</th><th>Реклама</th><th>Результат</th>
         </tr>
         </thead>
         <?$n=0?>
@@ -154,6 +154,11 @@ if($form['city']!='!empty!')$cityMessage=' (город '.$form['city'].')';
                 <td><b><?=number_format($city->profit, 2, ',', ' ')?> руб.</b></td>
                 <td><?=empty($city->sum_price)?0:round($city->profit/$city->sum_price*100,2)?>%</td>
                 <td><b><?=number_format(empty($city->sum_quantity)?0:($city->profit/$city->sum_quantity), 2, ',', ' ')?> руб.</b></td>
+                <td><b><?=number_format(isset($data['cities'][$city->city])?$data['cities'][$city->city]['deliveryServicesCostTotal']:0, 2, ',', ' ')?> руб.</b></td>
+                <td><b><?=number_format(isset($data['cities'][$city->city])?$data['cities'][$city->city]['adv']:0, 2, ',', ' ')?> руб.</b></td>
+                <td style="background-color:#FFF;color: <?=isset($data['cities'][$city->city])?$data['cities'][$city->city]['color']:''?>">
+                    <b><?=number_format(isset($data['cities'][$city->city])?$data['cities'][$city->city]['result']:0, 2, ',', ' ')?> руб.</b>
+                </td>
             </tr>
         <?php endforeach; ?>
         <tr class="danger">
@@ -163,6 +168,9 @@ if($form['city']!='!empty!')$cityMessage=' (город '.$form['city'].')';
             <td><b><?=number_format($data['city_all']['profit'], 2, ',', ' ')?> руб.</b></td>
             <td><?=empty($data['city_all']['sum_price'])?0:round($data['city_all']['profit']/$data['city_all']['sum_price']*100,2)?>%</td>
             <td><b><?=number_format(empty($data['city_all']['sum_quantity'])?0:($data['city_all']['profit']/$data['city_all']['sum_quantity']), 2, ',', ' ')?> руб.</b></td>
+            <td><b><?=number_format($data['city_all']['delivery'], 2, ',', ' ')?> руб.</b></td>
+            <td><b><?=number_format($data['city_all']['adv'], 2, ',', ' ')?> руб.</b></td>
+            <td><b><?=number_format($data['city_all']['result'], 2, ',', ' ')?> руб.</b></td>
         </tr>
     </table>
 <?php else: ?>
