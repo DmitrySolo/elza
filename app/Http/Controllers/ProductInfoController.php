@@ -6,6 +6,7 @@ use App\Models\AdvertInAction;
 use App\Models\Client;
 use App\Models\DocProduct;
 use App\Models\Document;
+use App\Models\MCity;
 use App\Models\ProductInfo;
 use App\Models\ProductInfoCategory;
 
@@ -55,12 +56,11 @@ class ProductInfoController extends Controller
         }
         return $n;
     }
-    function getStats($dateFirst,$dateLast,$city,ProductInfoCategory $category,ProductInfo $brand,Client $client,Document $RDS,CDEKController $cdek,AdvertInAction $adv){
+    function getStats($dateFirst,$dateLast,$city,ProductInfoCategory $category,ProductInfo $brand,Client $client){
         $stats=array();
         $stats['category_all']=['sum_price'=>0,'sum_quantity'=>0,'profit'=>0];
         $stats['brand_all']=['sum_price'=>0,'sum_quantity'=>0,'profit'=>0];
         $stats['city_all']=['sum_price'=>0,'sum_quantity'=>0,'profit'=>0,'delivery'=>0,'adv'=>0,'result'=>0];
-        $stats['cities']=array();
         $data=$category->getProductStats($dateFirst,$dateLast,$city);
         foreach ($data as $item){
             $head=$item->info_category;
@@ -82,6 +82,21 @@ class ProductInfoController extends Controller
             $stats['brand_all']['profit']+=$item->profit;
         }
 
+        $cdek = new CDEKController();
+        $adv = new AdvertInAction();
+        $RDS = new Document();
+        $cityRegion = new MCity();
+        $db_city=$cityRegion->getCitiesWithRegions();
+        $cityList=array();
+        $regionCount=array();
+        foreach ($db_city as $el_city){
+            $cityList[$el_city->city_name]=array(
+                'id'=>$el_city->region_id,
+                'name'=>$el_city->region_full_name
+            );
+            $regionCount[$el_city->region_id][]=$el_city->city_name;
+        }
+        //print_r($regionCount);
         $advList=array();
         $db_adv=$adv->getCitiesByDate($dateFirst);
         foreach ($db_adv as $el_adv){
@@ -90,8 +105,38 @@ class ProductInfoController extends Controller
 
         $data=$client->getProductStats($dateFirst,$dateLast);
         foreach ($data as $item){
+            foreach ($regionCount as &$oneRegion){
+                foreach ($oneRegion as &$oneCity){
+                    if($oneCity==$item->city)$oneCity=1;
+                }
+            }
+        }
+        foreach ($regionCount as &$oneRegion){
+            foreach ($oneRegion as $key=>$oneCity){
+                if($oneCity!=1)unset($oneRegion[$key]);
+            }
+        }
+        //print_r($regionCount);
+        foreach ($regionCount as $key=>$oneRegion){
+            $regionCount[$key]=count($oneRegion);
+        }
+        //print_r($regionCount);
+        foreach ($data as $key=>$item){
+            $cityItem=array(
+                'region_id'=>null,
+                'city'=>$item->city,
+                'cityName'=>empty($item->city)?'Без города':$item->city,
+                'sum_price'=>$item->sum_price,
+                'sum_quantity'=>$item->sum_quantity,
+                'profit'=>$item->profit,
+                'profit_percent'=>empty($item->sum_price)?0:round($item->profit/$item->sum_price*100,2),
+                'profit_average'=>empty($item->sum_quantity)?0:($item->profit/$item->sum_quantity),
+                'deliveryServicesCostTotal'=>0,
+                'adv'=>0,
+                'result'=>['value'=>0,'color'=>'']
+            );
+
             if(!empty($dateFirst)) {
-                $stats['cities'][$item->city]['deliveryServicesCostTotal'] = 0;
                 if(!empty($item->city)) {
                     $filter['period'] = array(
                         'start' => $dateFirst,
@@ -109,28 +154,63 @@ class ProductInfoController extends Controller
                             if (!isset($lInfo[$rds->number]['DeliverySumTotal'])) $lInfo[$rds->number]['DeliverySumTotal'] = 400;
                             $rds->status_code = $lInfo[$rds->number]['Status']['Code'];
                             if ($rds->status_code == 4 || $rds->status_code == 5) {
-                                $stats['cities'][$item->city]['deliveryServicesCostTotal'] += $lInfo[$rds->number]['DeliverySumTotal'];
+                                $cityItem['deliveryServicesCostTotal'] += $lInfo[$rds->number]['DeliverySumTotal'];
                             }
                         }
                     }
                 }
             }
 
-            $delivTotal=isset($stats['cities'][$item->city]['deliveryServicesCostTotal'])?$stats['cities'][$item->city]['deliveryServicesCostTotal']:0;
+            if(isset($cityList[$item->city])) $cityItem['region_id']=$cityList[$item->city]['id'];
+            $regCount=($cityItem['region_id']!=null)?$regionCount[$cityItem['region_id']]:1;
 
-            $stats['cities'][$item->city]['adv']=isset($advList[$item->city])?$advList[$item->city]:0;
-            $stats['cities'][$item->city]['result']=$item->profit-$delivTotal-$stats['cities'][$item->city]['adv'];
-            $stats['cities'][$item->city]['color']=($stats['cities'][$item->city]['result']<0)?'red':'green';
+            $cityItem['adv']=isset($advList[$item->city])?($advList[$item->city]/$regCount):0;
+            $cityItem['result']['value']=$item->profit-$cityItem['deliveryServicesCostTotal']-$cityItem['adv'];
+            $cityItem['result']['color']=($cityItem['result']['value']<0)?'red':'green';
 
-            $stats['city'][]=$item;
-            $stats['city_all']['sum_price']+=$item->sum_price;
-            $stats['city_all']['sum_quantity']+=$item->sum_quantity;
-            $stats['city_all']['profit']+=$item->profit;
-            $stats['city_all']['delivery']+=$delivTotal;
-            $stats['city_all']['adv']+=$stats['cities'][$item->city]['adv'];
-            $stats['city_all']['result']+=$stats['cities'][$item->city]['result'];
+            $keyCode="z_city_$key";
+            if(isset($cityList[$item->city])){
+                $keyCode="a_region_{$cityList[$item->city]['id']}_z_$key";
+                //$cityItem['region_id']=$cityList[$item->city]['id'];
+
+                $regionCode="a_region_{$cityList[$item->city]['id']}_a";
+                if(!isset($stats['city'][$regionCode]))
+                    $stats['city'][$regionCode]=array(
+                        'is_region'=>true,'region_id'=>$cityItem['region_id'],
+                        'city'=>$item->city, 'cityName'=>$cityList[$item->city]['name'],
+                        'sum_price'=>0, 'sum_quantity'=>0, 'profit'=>0, 'profit_percent'=>0,
+                        'profit_average'=>0, 'deliveryServicesCostTotal'=>0, 'adv'=>0,
+                        'result'=>['value'=>0,'color'=>'']
+                    );
+                $r=$stats['city'][$regionCode];
+
+                $r['sum_price']+=$cityItem['sum_price'];
+                $r['sum_quantity']+=$cityItem['sum_quantity'];
+                $r['profit']+=$cityItem['profit'];
+                $r['profit_percent']=empty($r['sum_price'])?0:round($r['profit']/$r['sum_price']*100,2);
+                $r['profit_average']=empty($r['sum_quantity'])?0:($r['profit']/$r['sum_quantity']);
+                $r['deliveryServicesCostTotal']+=$cityItem['deliveryServicesCostTotal'];
+                $r['adv']+=$cityItem['adv'];
+                $r['result']['value']=$r['profit']-$r['deliveryServicesCostTotal']-$r['adv'];
+                $r['result']['color']=($r['result']['value']<0)?'red':'green';
+
+                $stats['city'][$regionCode]=$r;
+            }
+            //сортировка записей
+            //сначала региональные (a_region), затем остальные города (z_city)
+            //в регионах первым делом записывается результат, а потом данные городов (z_$key)
+            $stats['city'][$keyCode]=$cityItem;
+
+            $stats['city_all']['sum_price']+=$cityItem['sum_price'];
+            $stats['city_all']['sum_quantity']+=$cityItem['sum_quantity'];
+            $stats['city_all']['profit']+=$cityItem['profit'];
+            $stats['city_all']['delivery']+=$cityItem['deliveryServicesCostTotal'];
+            $stats['city_all']['adv']+=$cityItem['adv'];
+            $stats['city_all']['result']+=$cityItem['result']['value'];
         }
-        //dd($stats['cities']);
+
+        ksort($stats['city']);
+
         return $stats;
     }
 

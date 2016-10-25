@@ -146,18 +146,18 @@ if($form['city']!='!empty!')$cityMessage=' (город '.$form['city'].')';
         </thead>
         <?$n=0?>
         <?php foreach($data['city'] as $city):?>
-            <tr class="warning">
+            <tr class="<?=isset($city['is_region'])?'success':'warning'?>">
                 <td><?=++$n?>.</td>
-                <td><a href="/stats?city=<?=$city->city?>&dateFirst=<?=$form['dateFirst']?>&dateLast=<?=$form['dateLast']?>"><?=empty($city->city)?'Без города':$city->city?></a></td>
-                <td><b><?=number_format($city->sum_price, 2, ',', ' ')?> руб.</b></td>
-                <td><?=$city->sum_quantity?></td>
-                <td><b><?=number_format($city->profit, 2, ',', ' ')?> руб.</b></td>
-                <td><?=empty($city->sum_price)?0:round($city->profit/$city->sum_price*100,2)?>%</td>
-                <td><b><?=number_format(empty($city->sum_quantity)?0:($city->profit/$city->sum_quantity), 2, ',', ' ')?> руб.</b></td>
-                <td><b><?=number_format(isset($data['cities'][$city->city]['deliveryServicesCostTotal'])?$data['cities'][$city->city]['deliveryServicesCostTotal']:0, 2, ',', ' ')?> руб.</b></td>
-                <td><b><?=number_format(isset($data['cities'][$city->city])?$data['cities'][$city->city]['adv']:0, 2, ',', ' ')?> руб.</b></td>
-                <td style="background-color:#FFF;color: <?=isset($data['cities'][$city->city])?$data['cities'][$city->city]['color']:''?>">
-                    <b><?=number_format(isset($data['cities'][$city->city])?$data['cities'][$city->city]['result']:0, 2, ',', ' ')?> руб.</b>
+                <td><a href="/stats?city=<?=$city['city']?>&dateFirst=<?=$form['dateFirst']?>&dateLast=<?=$form['dateLast']?>"><?=$city['cityName']?></a></td>
+                <td><b><?=number_format($city['sum_price'], 2, ',', ' ')?> руб.</b></td>
+                <td><?=$city['sum_quantity']?></td>
+                <td><b><?=number_format($city['profit'], 2, ',', ' ')?> руб.</b></td>
+                <td><?=$city['profit_percent']?>%</td>
+                <td><b><?=number_format($city['profit_average'], 2, ',', ' ')?> руб.</b></td>
+                <td><b><?=number_format($city['deliveryServicesCostTotal'], 2, ',', ' ')?> руб.</b></td>
+                <td><b><?=number_format($city['adv'], 2, ',', ' ')?> руб.</b></td>
+                <td style="background-color:#FFF;color: <?=$city['result']['color']?>">
+                    <b><?=number_format($city['result']['value'], 2, ',', ' ')?> руб.</b>
                 </td>
             </tr>
         <?php endforeach; ?>
