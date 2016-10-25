@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AdvertInAction;
 use App\Models\CdekCity;
 use App\Models\Client;
 use App\Models\ProductInfo;
@@ -272,7 +271,7 @@ class PageBuilderController extends Controller
             ->nest('rightsidebar', 'child.rightsidebar',$rightsidebarData);
     }
 
-    public function productStats(Request $request,ProductInfoCategory $category,ProductInfo $brand,Client $client,Document $RDS,CDEKController $cdek,AdvertInAction $adv){
+    public function productStats(Request $request,ProductInfoCategory $category,ProductInfo $brand,Client $client){
         $form['dateFirst']=isset($request->dateFirst)?$request->dateFirst:'';
         $form['dateLast']=isset($request->dateLast)?$request->dateLast:'';
         $form['city']=isset($request->city)?$request->city:'!empty!';
@@ -281,7 +280,7 @@ class PageBuilderController extends Controller
         $cities=$cl->getCities();
 
         $control=new ProductInfoController();
-        $stats=$control->getStats($form['dateFirst'],$form['dateLast'],$form['city'],$category,$brand,$client,$RDS,$cdek,$adv);
+        $stats=$control->getStats($form['dateFirst'],$form['dateLast'],$form['city'],$category,$brand,$client);
 
         $headerData=array('data'=>'header');
         $leftsidebarData=array('data'=>'leftsidebar');
