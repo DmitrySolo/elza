@@ -125,7 +125,7 @@ class ProductInfoController extends Controller
             $cityItem=array(
                 'region_id'=>null,
                 'city'=>$item->city,
-                'cityName'=>empty($item->city)?'Без города':$item->city,
+                'cityName'=>empty($item->city)?'Окно в Европу':$item->city,
                 'sum_price'=>$item->sum_price,
                 'sum_quantity'=>$item->sum_quantity,
                 'profit'=>$item->profit,
