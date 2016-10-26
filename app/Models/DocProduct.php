@@ -10,6 +10,9 @@ class DocProduct extends Model
     public function getAll($number){
         return $this->rdc($number)->get();
     }
+    public function getAllWithRet($number){
+        return $this->rdc($number)->return()->get();
+    }
     public function get($number,$sku){
         return $this->rdc($number)->product($sku)->first();
     }
@@ -44,10 +47,20 @@ class DocProduct extends Model
     }
 
     public function scopeRDC($query,$number){
-        $query->where('doc_number','=',$number);
+        $query->where('doc_products.doc_number','=',$number);
     }
 
     public function scopeProduct($query,$sku){
-        $query->where('sku','=',$sku);
+        $query->where('doc_products.sku','=',$sku);
+    }
+
+    public function scopeReturn($query){
+        $query->leftJoin('returns', 'doc_products.doc_number', '=', 'returns.doc_number')
+            ->leftJoin('ret_products', function($join)
+            {
+                $join->on('returns.ret_number', '=', 'ret_products.ret_number')
+                    ->on('doc_products.sku', '=', 'ret_products.ret_sku');
+            })
+            ->select('doc_products.*','returns.*','ret_products.*');
     }
 }

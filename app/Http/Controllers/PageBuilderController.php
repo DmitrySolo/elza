@@ -104,7 +104,8 @@ class PageBuilderController extends Controller
             }
             $ourShipingList = array_diff($rdsList,$DocsByCdek);
             // dd($ourShipingList);
-            $goods = $RDS->getWithClientAndGoodsByMultiID($rdsList);// получаем список товаров
+            $goods = $RDS->getWithGCRByMultiID($rdsList);// получаем список товаров
+            //dd($goods);
             //dd($lInfo);
             foreach ($goods as $resItem) {
                 //if(isset($resCdek['Package']) && !empty($resCdek['Package'])){}
@@ -121,6 +122,12 @@ class PageBuilderController extends Controller
                                 $package[$key] = $value;
                             }
                         }
+                    }
+                    //dd($resItem);
+                    if(!empty($resItem['ret_sku'])){//если товар возвратный, то убираем прибыль
+                        $resItem['price']-=$resItem['ret_price'];
+                        $resItem['quantity']-=$resItem['ret_quantity'];
+                        $resItem['base_price']-=$resItem['ret_base_price'];
                     }
 
                     if (!isset($lInfo[$resItem['number']]['flag'])) {
@@ -167,10 +174,15 @@ class PageBuilderController extends Controller
             }
             $nocdekResultArr = array();
             foreach ($ourShipingList as $key => $doc){//////////////////////IF NO CDEK!!!!
-                $products = $product->getAll($doc);
+                $products = $product->getAllWithRet($doc);// С ВОЗВРАТАМИ
                 //print_r($products);
 
                 foreach($products as $item =>$val) {
+                    if(!empty($val->ret_sku)){//если товар возвратный, то убираем прибыль
+                        $val->price-=$val->ret_price;
+                        $val->quantity-=$val->ret_quantity;
+                        $val->base_price-=$val->ret_base_price;
+                    }
 
                     if ($val['sku'] == 106730) {
                         $costDel = $val['price'];
