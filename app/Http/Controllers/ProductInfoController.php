@@ -125,7 +125,7 @@ class ProductInfoController extends Controller
             $cityItem=array(
                 'region_id'=>null,
                 'city'=>$item->city,
-                'cityName'=>empty($item->city)?'Без города':$item->city,
+                'cityName'=>empty($item->city)?'Окно в Европу':$item->city,
                 'sum_price'=>$item->sum_price,
                 'sum_quantity'=>$item->sum_quantity,
                 'profit'=>$item->profit,
@@ -155,33 +155,36 @@ class ProductInfoController extends Controller
                             $rds->status_code = $lInfo[$rds->number]['Status']['Code'];
                             if ($rds->status_code == 4 || $rds->status_code == 5) {
                                 $cityItem['deliveryServicesCostTotal'] += $lInfo[$rds->number]['DeliverySumTotal'];
+                                foreach($lInfo[$rds->number]['AddedService'] as $service){
+                                    $cityItem['deliveryServicesCostTotal'] += $service['@attributes']['Sum'];
+                                }
                             }
                         }
                     }
                 }
             }
 
-            if(isset($cityList[$item->city])) $cityItem['region_id']=$cityList[$item->city]['id'];
-            $regCount=($cityItem['region_id']!=null)?$regionCount[$cityItem['region_id']]:1;
+            $cityItem['adv']=isset($advList[$item->city])?($advList[$item->city]):0;
 
-            $cityItem['adv']=isset($advList[$item->city])?($advList[$item->city]/$regCount):0;
-            $cityItem['result']['value']=$item->profit-$cityItem['deliveryServicesCostTotal']-$cityItem['adv'];
-            $cityItem['result']['color']=($cityItem['result']['value']<0)?'red':'green';
-
-            $keyCode="z_city_$key";
+            $k=sprintf("%02d", $key);
+            $keyCode="z_city_$k";
             if(isset($cityList[$item->city])){
-                $keyCode="a_region_{$cityList[$item->city]['id']}_z_$key";
-                //$cityItem['region_id']=$cityList[$item->city]['id'];
+                $keyCode="a_region_{$cityList[$item->city]['id']}_z_$k";
+                $cityItem['region_id']=$cityList[$item->city]['id'];
 
                 $regionCode="a_region_{$cityList[$item->city]['id']}_a";
-                if(!isset($stats['city'][$regionCode]))
-                    $stats['city'][$regionCode]=array(
-                        'is_region'=>true,'region_id'=>$cityItem['region_id'],
-                        'city'=>$item->city, 'cityName'=>$cityList[$item->city]['name'],
-                        'sum_price'=>0, 'sum_quantity'=>0, 'profit'=>0, 'profit_percent'=>0,
-                        'profit_average'=>0, 'deliveryServicesCostTotal'=>0, 'adv'=>0,
-                        'result'=>['value'=>0,'color'=>'']
+                if(!isset($stats['city'][$regionCode])) {
+                    $stats['city'][$regionCode] = array(
+                        'is_region' => true, 'region_id' => $cityItem['region_id'],
+                        'city' => $item->city, 'cityName' => $cityList[$item->city]['name'],
+                        'sum_price' => 0, 'sum_quantity' => 0, 'profit' => 0, 'profit_percent' => 0,
+                        'profit_average' => 0, 'deliveryServicesCostTotal' => 0, 'adv' => $cityItem['adv'],
+                        'result' => ['value' => 0, 'color' => '']
                     );
+                    $stats['city_all']['adv']+=$cityItem['adv'];
+                }
+                $cityItem['adv']=0;
+
                 $r=$stats['city'][$regionCode];
 
                 $r['sum_price']+=$cityItem['sum_price'];
@@ -190,22 +193,26 @@ class ProductInfoController extends Controller
                 $r['profit_percent']=empty($r['sum_price'])?0:round($r['profit']/$r['sum_price']*100,2);
                 $r['profit_average']=empty($r['sum_quantity'])?0:($r['profit']/$r['sum_quantity']);
                 $r['deliveryServicesCostTotal']+=$cityItem['deliveryServicesCostTotal'];
-                $r['adv']+=$cityItem['adv'];
+                //$r['adv']+=$cityItem['adv'];
                 $r['result']['value']=$r['profit']-$r['deliveryServicesCostTotal']-$r['adv'];
                 $r['result']['color']=($r['result']['value']<0)?'red':'green';
 
                 $stats['city'][$regionCode]=$r;
             }
+
+            $cityItem['result']['value']=$item->profit-$cityItem['deliveryServicesCostTotal']-$cityItem['adv'];
+            $cityItem['result']['color']=($cityItem['result']['value']<0)?'red':'green';
+
             //сортировка записей
             //сначала региональные (a_region), затем остальные города (z_city)
-            //в регионах первым делом записывается результат, а потом данные городов (z_$key)
+            //в регионах первым делом записывается результат, а потом данные городов (z_$k)
             $stats['city'][$keyCode]=$cityItem;
 
             $stats['city_all']['sum_price']+=$cityItem['sum_price'];
             $stats['city_all']['sum_quantity']+=$cityItem['sum_quantity'];
             $stats['city_all']['profit']+=$cityItem['profit'];
             $stats['city_all']['delivery']+=$cityItem['deliveryServicesCostTotal'];
-            $stats['city_all']['adv']+=$cityItem['adv'];
+            //$stats['city_all']['adv']+=$cityItem['adv'];
             $stats['city_all']['result']+=$cityItem['result']['value'];
         }
 
