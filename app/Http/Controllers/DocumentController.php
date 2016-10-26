@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\CSVClient;
+use App\Models\CSVPnk;
+use App\Models\RetProduct;
+use App\Models\Returns;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -58,13 +61,17 @@ class DocumentController extends Controller
     public function import(){
         $CSVDocument=new CSVDocument();
         $CSVClient=new CSVClient();
+        $CSVPnk=new CSVPnk();
         $client=new Client();
         $document=new Document();
         $docProduct=new DocProduct();
+        $returns=new Returns();
+        $retProduct=new RetProduct();
         $p_info=new ProductInfoController();
         $ar_products=array();
         $CSVDocument->open();
         //$i=0;
+/*
         while($data=$CSVDocument->getLine()){
             if(empty($data['product_code']))$document->import($data);
             else {
@@ -81,6 +88,18 @@ class DocumentController extends Controller
             $client->import($data);
         }
         echo 'ok CSVClient<br>';
+*/
+        $CSVPnk->open();
+        while($data=$CSVPnk->getLine()){
+            if(empty($data['product_code']))$returns->import($data);
+            else {
+                $retProduct->import($data);
+                //$ar_products[]=$data['product_code'];
+            }
+            //if(++$i>10)break;
+        }
+        //$p_info->updateByArray($ar_products);
+        echo 'ok CSVPnk<br>';
     }
 
 

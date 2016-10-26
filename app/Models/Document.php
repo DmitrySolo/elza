@@ -16,6 +16,9 @@ class Document extends Model
         $res = $this->rdc($number)->first();
         return $res;
     }
+    public function getByClientId($client){
+        return $this->where('client_id',$client)->get();
+    }
     public function getWithClient($number){
         $res = $this->rdc($number)->client()->first();
         return $res;
@@ -25,6 +28,15 @@ class Document extends Model
     }
     public function getWithClientAndGoodsByMultiID($numbers){
         return $res = $this->rdcmulti($numbers)->GoodsAndClients()->get();
+    }
+
+    /**
+     * GCR - Goods, Clients, Returns
+     * @param $numbers
+     * @return mixed
+     */
+    public function getWithGCRByMultiID($numbers){
+        return $res = $this->rdcmulti($numbers)->GoodsClientsReturns()->get();
     }
 
     public function import($arr){
@@ -53,6 +65,17 @@ class Document extends Model
         $query->join('doc_products', 'documents.number', '=', 'doc_products.doc_number')
             ->join('clients', 'documents.client_id', '=', 'clients.id')
             ->select('documents.*', 'clients.name', 'clients.address','clients.city', 'clients.phone','doc_products.*');
+    }
+    public function scopeGoodsClientsReturns($query){
+        $query->join('doc_products', 'documents.number', '=', 'doc_products.doc_number')
+            ->leftJoin('returns', 'doc_products.doc_number', '=', 'returns.doc_number')
+            ->leftJoin('ret_products', function($join)
+            {
+                $join->on('returns.ret_number', '=', 'ret_products.ret_number')
+                    ->on('doc_products.sku', '=', 'ret_products.ret_sku');
+            })
+            ->join('clients', 'documents.client_id', '=', 'clients.id')
+            ->select('documents.*', 'clients.name', 'clients.address','clients.city', 'clients.phone','doc_products.*','returns.*','ret_products.*');
     }
 
     public function getList($page=0,$arrFilter)
