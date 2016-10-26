@@ -155,7 +155,7 @@ if($form['city']!='!empty!')$cityMessage=' (город '.$form['city'].')';
                 <td><?=$city['profit_percent']?>%</td>
                 <td><b><?=number_format($city['profit_average'], 2, ',', ' ')?> руб.</b></td>
                 <td><b><?=number_format($city['deliveryServicesCostTotal'], 2, ',', ' ')?> руб.</b></td>
-                <td><b><?=number_format($city['adv'], 2, ',', ' ')?> руб.</b></td>
+                <td><b><?=$city['adv']?number_format($city['adv'], 2, ',', ' ').' руб.':'-'?></b></td>
                 <td style="background-color:#FFF;color: <?=$city['result']['color']?>">
                     <b><?=number_format($city['result']['value'], 2, ',', ' ')?> руб.</b>
                 </td>
