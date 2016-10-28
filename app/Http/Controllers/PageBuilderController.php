@@ -102,8 +102,9 @@ class PageBuilderController extends Controller
             foreach ($lInfo as $key=>$value){
                 $DocsByCdek[] = $key;
             }
+            //dd($DocsByCdek);
             $ourShipingList = array_diff($rdsList,$DocsByCdek);
-            // dd($ourShipingList);
+            //dd($ourShipingList);
             $goods = $RDS->getWithGCRByMultiID($rdsList);// получаем список товаров
             //dd($goods);
             //dd($lInfo);
@@ -176,6 +177,7 @@ class PageBuilderController extends Controller
             foreach ($ourShipingList as $key => $doc){//////////////////////IF NO CDEK!!!!
                 $products = $product->getAllWithRet($doc);// С ВОЗВРАТАМИ
                 //print_r($products);
+                //dd([$doc,$products]);
 
                 foreach($products as $item =>$val) {
                     if(!empty($val->ret_sku)){//если товар возвратный, то убираем прибыль

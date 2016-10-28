@@ -30,7 +30,7 @@ class Returns extends Model
         if(!$this->getByPNK($arr['document_number'])) $this->insert(
             [
                 "ret_number" =>$arr['document_number'],
-                "doc_number" =>$arr['doc_number'],
+                "docu_number" =>$arr['docu_number'],
                 "ret_date"=>$arr['document_date'],
                 "ret_desc"=>$arr['document_description'],
                 "ret_author"=>$arr['document_author'],
@@ -40,10 +40,10 @@ class Returns extends Model
     }
 
     public function scopeRDS($query,$number){
-        $query->where('doc_number','=',$number);
+        $query->where('docu_number','=',$number);
     }
     public function scopeRDSMulti($query,$numbers){
-        $query->whereIn('doc_number', $numbers);
+        $query->whereIn('docu_number', $numbers);
     }
 
     public function scopePNK($query,$number){

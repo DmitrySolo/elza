@@ -28,24 +28,24 @@ class CSVPnk extends Model{
 
         preg_match('/РД.+-[0-9]+/',mb_strtoupper($arResult['document_description']),$matches);
         //dd($matches);
-        $arResult['doc_number']=isset($matches[0])?$matches[0]:'';
-        if(empty($arResult['doc_number'])){
+        $arResult['docu_number']=isset($matches[0])?$matches[0]:'';
+        if(empty($arResult['docu_number'])){
             preg_match('/[0-9][0-9][0-9][0-9]/',mb_strtoupper($arResult['document_description']),$matches);
-            $arResult['doc_number']=isset($matches[0])?'РДС-00'.$matches[0]:'';
+            $arResult['docu_number']=isset($matches[0])?'РДС-00'.$matches[0]:'';
         }
-        if(empty($arResult['doc_number'])){//for future
+        if(empty($arResult['docu_number'])){//for future
             preg_match('/[0-9][0-9][0-9][0-9][0-9]/',mb_strtoupper($arResult['document_description']),$matches);
-            $arResult['doc_number']=isset($matches[0])?'РДС-0'.$matches[0]:'';
+            $arResult['docu_number']=isset($matches[0])?'РДС-0'.$matches[0]:'';
         }
-        /*if(empty($arResult['doc_number'])){//additional giving
+        /*if(empty($arResult['docu_number'])){//additional giving
             if(!empty($arResult['document_client'])&&$arResult['document_client']!=3) {
                 $db_docs = new Document();
                 $db_res=$db_docs->getByClientId($arResult['document_client']);
                 dd($db_res);
             }
         }*/
-        //$arResult['doc_number']=preg_replace('/.+РДС/','РДС',mb_strtoupper($arResult['document_description']));
-        //$arResult['doc_number']=preg_replace('/\ ОТ.+/','',$arResult['doc_number']);
+        //$arResult['docu_number']=preg_replace('/.+РДС/','РДС',mb_strtoupper($arResult['document_description']));
+        //$arResult['docu_number']=preg_replace('/\ ОТ.+/','',$arResult['docu_number']);
         //dd($arResult);
 
         return $arResult;

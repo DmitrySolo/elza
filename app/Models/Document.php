@@ -68,14 +68,14 @@ class Document extends Model
     }
     public function scopeGoodsClientsReturns($query){
         $query->join('doc_products', 'documents.number', '=', 'doc_products.doc_number')
-            ->leftJoin('returns', 'doc_products.doc_number', '=', 'returns.doc_number')
+            ->leftJoin('returns', 'doc_products.doc_number', '=', 'returns.docu_number')
             ->leftJoin('ret_products', function($join)
             {
                 $join->on('returns.ret_number', '=', 'ret_products.ret_number')
                     ->on('doc_products.sku', '=', 'ret_products.ret_sku');
             })
             ->join('clients', 'documents.client_id', '=', 'clients.id')
-            ->select('documents.*', 'clients.name', 'clients.address','clients.city', 'clients.phone','doc_products.*','returns.*','ret_products.*');
+            ->select('documents.*', 'clients.name', 'clients.address','clients.city', 'clients.phone','doc_products.*','ret_products.*');
     }
 
     public function getList($page=0,$arrFilter)
