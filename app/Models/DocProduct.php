@@ -55,7 +55,7 @@ class DocProduct extends Model
     }
 
     public function scopeReturn($query){
-        $query->leftJoin('returns', 'doc_products.doc_number', '=', 'returns.doc_number')
+        $query->leftJoin('returns', 'doc_products.doc_number', '=', 'returns.docu_number')
             ->leftJoin('ret_products', function($join)
             {
                 $join->on('returns.ret_number', '=', 'ret_products.ret_number')
