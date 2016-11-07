@@ -33,6 +33,7 @@ class ProductInfoController extends Controller
         $response=$this->_bitrix_curl(['action'=>'products_info','products'=>$arProducts]);
 
         $n=0;
+        if(isset($response['PRODUCTS'])&&!empty($response['PRODUCTS']))
         foreach ($response['PRODUCTS'] as $p){
             $params=array(
                 'sku'=>$p['XML_ID'],
@@ -71,6 +72,11 @@ class ProductInfoController extends Controller
                 $stats['category_all']['sum_price']+=$item->sum_price;
                 $stats['category_all']['sum_quantity']+=$item->sum_quantity;
                 $stats['category_all']['profit']+=$item->profit;
+                /*if(!empty($item->ret_sku)){//если товар возвратный, то убираем прибыль
+                    $stats['category_all']['sum_price']-=$item->ret_price;
+                    $stats['category_all']['sum_quantity']-=$item->ret_quantity;
+                    $stats['category_all']['profit']-=$item->ret_base_price;
+                }*/
             }
         }
 
