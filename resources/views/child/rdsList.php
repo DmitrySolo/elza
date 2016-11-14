@@ -39,6 +39,8 @@
             <td><?php echo $rds->city?></td>
             <td><?if(isset($rds->total)){
                     switch($rds->status_code){
+                        case 81: $label="label status-return";
+                            break;
                         case 777: $label="label label-primary";
                             break;
                         case 4: $label="label label-success";
