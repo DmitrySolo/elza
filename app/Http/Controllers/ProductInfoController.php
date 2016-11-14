@@ -65,18 +65,20 @@ class ProductInfoController extends Controller
         $data=$category->getProductStats($dateFirst,$dateLast,$city);
         foreach ($data as $item){
             $head=$item->info_category;
-            preg_match("/(.+?)\//", $head,$matches);
-            $head=isset($matches[1])?$matches[1]:$head;
+            if(!empty($head)) {
+                preg_match("/(.+?)\//", $head, $matches);
+                $head = isset($matches[1]) ? $matches[1] : $head;
+            }
             $stats['category'][$head][]=$item;
             if($head==$item->info_category){
                 $stats['category_all']['sum_price']+=$item->sum_price;
                 $stats['category_all']['sum_quantity']+=$item->sum_quantity;
                 $stats['category_all']['profit']+=$item->profit;
-                /*if(!empty($item->ret_sku)){//если товар возвратный, то убираем прибыль
-                    $stats['category_all']['sum_price']-=$item->ret_price;
-                    $stats['category_all']['sum_quantity']-=$item->ret_quantity;
-                    $stats['category_all']['profit']-=$item->ret_base_price;
-                }*/
+                if(!empty($item->sum_ret_price)){//если товар возвратный, то убираем прибыль
+                    $stats['category_all']['sum_price']-=$item->sum_ret_price;
+                    $stats['category_all']['sum_quantity']-=$item->sum_ret_quantity;
+                    $stats['category_all']['profit']-=$item->ret_profit;
+                }
             }
         }
 
@@ -86,6 +88,11 @@ class ProductInfoController extends Controller
             $stats['brand_all']['sum_price']+=$item->sum_price;
             $stats['brand_all']['sum_quantity']+=$item->sum_quantity;
             $stats['brand_all']['profit']+=$item->profit;
+            if(!empty($item->sum_ret_price)){//если товар возвратный, то убираем прибыль
+                $stats['brand_all']['sum_price']-=$item->sum_ret_price;
+                $stats['brand_all']['sum_quantity']-=$item->sum_ret_quantity;
+                $stats['brand_all']['profit']-=$item->ret_profit;
+            }
         }
 
         $cdek = new CDEKController();
@@ -128,6 +135,12 @@ class ProductInfoController extends Controller
         }
         //print_r($regionCount);
         foreach ($data as $key=>$item){
+            if(!empty($item->sum_ret_price)){//если товар возвратный, то убираем прибыль
+                $item->sum_price-=$item->sum_ret_price;
+                $item->sum_quantity-=$item->sum_ret_quantity;
+                $item->profit-=$item->ret_profit;
+            }
+
             $cityItem=array(
                 'region_id'=>null,
                 'city'=>$item->city,

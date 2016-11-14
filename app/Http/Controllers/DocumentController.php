@@ -71,7 +71,7 @@ class DocumentController extends Controller
         $ar_products=array();
         $CSVDocument->open();
         //$i=0;
-/*
+
         while($data=$CSVDocument->getLine()){
             if(empty($data['product_code']))$document->import($data);
             else {
@@ -88,7 +88,7 @@ class DocumentController extends Controller
             $client->import($data);
         }
         echo 'ok CSVClient<br>';
-*/
+
         $CSVPnk->open();
         while($data=$CSVPnk->getLine()){
             if(empty($data['product_code']))$returns->import($data);

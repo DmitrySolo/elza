@@ -134,6 +134,11 @@ p.task-problem{
 .form-inline {
     background-color: #F5F5DC;
 }
+.status-return{
+    border: solid red;
+    background-color: white;
+    color: black;
+}
 
 ul.stats{
     list-style-type: none;

@@ -58,7 +58,7 @@ if($form['city']!='!empty!')$cityMessage=' (город '.$form['city'].')';
                     <ul class="stats">
                         <?php foreach($categories as $num=>$category):?>
                             <li <?=empty($num)?' style="text-decoration: underline"':''?>>
-                                <?=$category->sum_quantity?>
+                                <?=sprintf('%d',$category->sum_quantity)?>
                             </li>
                         <?php endforeach; ?>
                     </ul>
