@@ -90,6 +90,7 @@ class PageBuilderController extends Controller
             'st45'=>0,
         );
 
+        $returns=array();
         $rdsList=array();
         $rdsCount = count($list['query']);
         foreach($list['query'] as $rds){
@@ -126,6 +127,7 @@ class PageBuilderController extends Controller
                     }
                     //dd($resItem);
                     if(!empty($resItem['ret_sku'])){//если товар возвратный, то убираем прибыль
+                        $returns[$resItem['number']]=true;
                         $resItem['price']-=$resItem['ret_price'];
                         $resItem['quantity']-=$resItem['ret_quantity'];
                         $resItem['base_price']-=$resItem['ret_base_price'];
@@ -181,6 +183,7 @@ class PageBuilderController extends Controller
 
                 foreach($products as $item =>$val) {
                     if(!empty($val->ret_sku)){//если товар возвратный, то убираем прибыль
+                        $returns[$val->doc_number]=true;
                         $val->price-=$val->ret_price;
                         $val->quantity-=$val->ret_quantity;
                         $val->base_price-=$val->ret_base_price;
@@ -207,7 +210,7 @@ class PageBuilderController extends Controller
                     $rds->total = $lInfo[$rds->number]['total'];
                     $rds->total_d = $lInfo[$rds->number]['total_price']+$costDel;
                     $rds->totalDelSrvcs = $lInfo[$rds->number]['totalDel'];
-                    $rds->status_code = $lInfo[$rds->number]['Status']['Code'];
+                    $rds->status_code = (isset($returns[$rds->number]))?81:$lInfo[$rds->number]['Status']['Code'];
                     $rds->status_desc=$lInfo[$rds->number]['Status']['Description'];
                     $rds->reason=$lInfo[$rds->number]['Reason']['Description'];
                     $footerData['total_price']+=$rds->total_d;
@@ -226,11 +229,11 @@ class PageBuilderController extends Controller
                 else{//IF NO CDEK
                     $rds->total = $nocdekResultArr[$rds->number]['total'];
                     $rds->totalDelSrvcs = 0;
-                    $rds->status_code = 777;
+                    $rds->status_code = (isset($returns[$rds->number]))?81:777;
                     $rds->status_desc='ok';
                     $rds->reason='ok';
                     $footerData['endTotal']+=$rds->total;
-                    $footerData['total_price']+=$nocdekResultArr[$val->doc_number]['total_price']+$costDel;
+                    $footerData['total_price']+=$nocdekResultArr[$rds->number]['total_price']+$costDel;
 
                     $footerData['deliveryServicesCostTotal']+=$rds->totalDelSrvcs;
                 }
