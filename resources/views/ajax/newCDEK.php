@@ -108,8 +108,9 @@
                     <label>
                         <select name="tariff" class="form-control">
                             <option value="">Выберите тариф</option>
-                            <option value="63">Магистральный супер-экспресс склад-склад</option>
-                            <option value="136">Посылка склад-склад</option>
+                            <?foreach ($tariffs as $tariff){?>
+                                <option value="<?=$tariff->cdek_tariff_code?>" data-door="<?=$tariff->cdek_tariff_door?>"><?=$tariff->cdek_tariff_name?></option>
+                            <?}?>
                         </select>
                     </label>
                 </div>

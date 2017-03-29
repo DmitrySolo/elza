@@ -83,6 +83,20 @@ class CDEKController extends Controller
         }
         return "";
     }
+
+    public function getDispatchNumber($number){
+        $arInfo=array(
+            array(
+                'OBJECT'=>'Order',
+                'ATTRIBUTES'=>['Number'=>$number]
+            )
+        );
+        $info=$this->_getCDEK($this->_status_report($arInfo));
+        if(isset($info['Order']['@attributes']['DispatchNumber'])) {
+            return $info['Order']['@attributes']['DispatchNumber'];
+        }
+        return null;
+    }
     public function getListInfo($arOrders){
         $arResult=array();
         $arReport=array();
