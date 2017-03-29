@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\CdekCity;
+use App\Models\CdekTariff;
 use Illuminate\Contracts\Mail\Mailer;
 use App\Models\Client;
 use App\Models\Task;
@@ -126,6 +127,7 @@ class AjaxFormController extends Controller
             $client=array();
             $flag=0;
         foreach($res as $resItem){
+            $resCdek['track']=$resItem['track'];
             if(!$flag){
                 $client['name']=$resItem['name'];
                 $client['address']=$resItem['address'];
@@ -186,8 +188,10 @@ class AjaxFormController extends Controller
     public function newCDEK(Request $request,Document $doc){
         $cdekCities=new CdekCity();
         $cities=$cdekCities->getList();
+        $cdekTariffs=new CdekTariff();
+        $tariffs=$cdekTariffs->getList();
 
-        $bitrix = new BitrixController();
+        //$bitrix = new BitrixController();
 
         $input = [
             'Number' => $request->rds,
@@ -229,7 +233,7 @@ class AjaxFormController extends Controller
         }
         $packagenum=0;
         if(isset($input['PACKAGES']))$packagenum=count($input['PACKAGES']);
-            $mainData = array('input' => $input,'cities'=>$cities,'packagenum' => $packagenum);
+            $mainData = array('input' => $input,'cities'=>$cities,'tariffs'=>$tariffs,'packagenum' => $packagenum);
         return view('ajax.newCDEK',$mainData);
     }
 

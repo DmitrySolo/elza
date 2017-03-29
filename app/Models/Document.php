@@ -16,6 +16,10 @@ class Document extends Model
         $res = $this->rdc($number)->first();
         return $res;
     }
+    public function getWithOld($number,$old){
+        $res = $this->rdc($number)->where('old',$old)->first();
+        return $res;
+    }
     public function getByClientId($client){
         return $this->where('client_id',$client)->get();
     }
@@ -29,6 +33,13 @@ class Document extends Model
     public function getWithClientAndGoodsByMultiID($numbers){
         return $res = $this->rdcmulti($numbers)->GoodsAndClients()->get();
     }
+    public function getWithoutTrack(){
+        return $this->where('track',0)->get();
+    }
+
+    public function setTrack($number,$track){
+        return $this->rdc($number)->update(['track'=>$track]);
+    }
 
     /**
      * GCR - Goods, Clients, Returns
@@ -40,15 +51,18 @@ class Document extends Model
     }
 
     public function import($arr){
-        if(!$this->get($arr['document_number'])) $this->insert(
+        $retId=0;
+        if(!$this->getWithOld($arr['document_number'],$arr['document_old'])) $retId=$this->insertGetId(
             [
                 "number" =>$arr['document_number'],
                 "date"=>$arr['document_date'],
                 "description"=>$arr['document_description'],
                 "author"=>$arr['document_author'],
+                "old"=>$arr['document_old'],
                 "client_id"=>$arr['document_client']
             ]
         );
+        return $retId;
     }
 
     public function scopeRDC($query,$number){

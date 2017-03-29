@@ -115,7 +115,8 @@
 </tr>
 <?php if(!isset($data['pp']['ERROR_CDEK'])):?>
 <tr>
-    <td class="info" colspan="4" align="center"><h5>СДЭК</h5></td>
+    <td class="info" colspan="4" align="center"><h5>СДЭК
+            <?if(!empty($data['pp']['track'])){?> (<a href="http://www.edostavka.ru/track.html?order_id=<?=$data['pp']['track']?>" target="_blank">пробить его можно здесь</a>)<?}?></h5></td>
 </tr>
 <tr>
     <td>Статус:</td>

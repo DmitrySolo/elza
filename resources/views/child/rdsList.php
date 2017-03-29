@@ -53,9 +53,9 @@
                     ?><span class="<?=$label?>"><?=$rds->total?></span><?}?></td>
             <td><button class="btn btn-sm btn-primary RDSmodal" data-toggle="modal" data-target="#RDSModal" id="allAboutRDS" href="#allAboutRDS" data-rds="<? echo $rds->number ?>">Подробнее</button>
             </td>
-            <td><?if(!isset($rds->total)&&$rds->city!='Воронеж'){?>
+            <td><?//if(!isset($rds->total)&&$rds->city!='Воронеж'){?>
                 <button class="btn btn-sm btn-warning newCDEKmodal" data-toggle="modal" data-target="#newCDEKModal" id="newCDEK" href="#newCDEK" data-rds="<? echo $rds->number ?>">Оформить</button>
-            <?}?></td>
+            <?//}?></td>
         </tr>
     <?php endforeach;?>
 </table>

@@ -319,6 +319,9 @@ $(document).on('change','.form-group.package input',
 $(document).on('change','.cdek-form select, .cdek-form .what input',
     newCdekCalc
 );
+$(document).on('change','.cdek-form .cdek-city-select',
+    getPVZ
+);
 $(document).on('click','.newCDEKmodal',
     function(){
         var rds=$(this).data('rds');
@@ -368,7 +371,10 @@ $(document).ready(function() {
 
             var inputs = form.find('input,select'),
                 submit = form.find('input[type=submit]'),
-                valid = true;
+                valid = true,
+                door = false,
+                adr = true,
+                pvz = true;
 
             submit.tooltip('destroy');
             form.find('.form-group').removeClass('has-error').removeClass('has-success');
@@ -381,13 +387,25 @@ $(document).ready(function() {
                 if(input.attr('type')!='checkbox' && input.attr('name')!='flat') {
                     if (val.length === 0) {
                         formGroup.addClass('has-error').removeClass('has-success');
-                        valid = false;
+                        if(input.attr('name')=='street'||input.attr('name')=='house'||input.attr('name')=='flat'){
+                            adr = false;
+                        }else if(input.attr('name')=='pvz'){
+                            pvz = false;
+                        }else {
+                            valid = false;
+                        }
                     } else {
+                        if(input.attr('name')=='tariff'){
+                            if($('.form-group select[name="tariff"] option[value="'+val+'"]').data('door')=="1")door=true;
+                        }
                         if (!formGroup.hasClass('has-error'))
                             formGroup.addClass('has-success');
                     }
                 }
             });
+
+            if(door==false && pvz==false) valid = false;
+            if(door==true && adr==false) valid = false;
 
             var errstr='';
             if(!valid)errstr='Имеются незаполненные поля\n';
