@@ -97,46 +97,61 @@ class CDEKController extends Controller
         }
         return null;
     }
-    public function getListInfo($arOrders){
+    public function getListInfo($arOrders){//принимает $rdsArrays!!!
         $arResult=array();
         $arReport=array();
-        foreach($arOrders as $number){
+        foreach($arOrders as $arOrder){
+            $var_index=isset($arOrder['Old'])?'Old':'New';
             $arReport[]=array(
                 'OBJECT'=>'Order',
-                'ATTRIBUTES'=>['Number'=>$number]
+                'ATTRIBUTES'=>['Number'=>$arOrder[$var_index]['number']]
             );
         }
         $report=$this->_getCDEK($this->_status_report($arReport));
         if(isset($report['Order'])) {
+            //dd($report);
             $arInfo = array();
             if (isset($report['Order']['@attributes'])) $report['Order'] = array($report['Order']);
             foreach ($report['Order'] as $order) {
                 if (isset($order['@attributes']['Number'])) {
-                    $arResult[$order['@attributes']['Number']] = array(
-                        'Number' => $order['@attributes']['Number'],
-                        'Status' => $order['Status']['@attributes'],
-                        'Reason' => $order['Reason']['@attributes']
-                    );
-                    if(isset($order['Package'])){
-                        $arResult[$order['@attributes']['Number']]['Package']=$order['Package'];
-                    }
+                    $order_subfolder = 'Old';
+                    $order_year=intval(substr($order['@attributes']['DeliveryDate'],0,4));
+                    if($order_year>=2017) $order_subfolder = 'New';
 
-                    $arInfo[] = array(
-                        'OBJECT' => 'Order',
-                        'ATTRIBUTES' => ['DispatchNumber' => $order['@attributes']['DispatchNumber']]
-                    );
+                    if(isset($arOrders[$order['@attributes']['Number']][$order_subfolder])) {
+                        $arResult[$order['@attributes']['Number']][$order_subfolder] = array(
+                            'Number' => $order['@attributes']['Number'],
+                            'Status' => $order['Status']['@attributes'],
+                            'Reason' => $order['Reason']['@attributes'],
+                            'Old' => true
+                        );
+                        if (isset($order['Package'])) {
+                            $arResult[$order['@attributes']['Number']][$order_subfolder]['Package'] = $order['Package'];
+                        }
+
+                        $arInfo[] = array(
+                            'OBJECT' => 'Order',
+                            'ATTRIBUTES' => ['DispatchNumber' => $order['@attributes']['DispatchNumber']]
+                        );
+                    }
                 }
             }
             $info = $this->_getCDEK($this->_info_report($arInfo));
             if (isset($info['Order']['@attributes'])) $info['Order'] = array($info['Order']);
             foreach ($info['Order'] as $order) {
-                $sum = intval($order['@attributes']['DeliverySum']);
-                foreach ($order['AddedService'] as $service) {
-                    $sum += intval($service['@attributes']['Sum']);
+                $order_subfolder = 'Old';
+                $order_year=intval(substr($order['@attributes']['Date'],0,4));
+                if($order_year>=2017) $order_subfolder = 'New';
+
+                if(isset($arOrders[$order['@attributes']['Number']][$order_subfolder])) {
+                    $sum = intval($order['@attributes']['DeliverySum']);
+                    foreach ($order['AddedService'] as $service) {
+                        $sum += intval($service['@attributes']['Sum']);
+                    }
+                    $arResult[$order['@attributes']['Number']][$order_subfolder]['DeliverySum'] = $order['@attributes']['DeliverySum'];
+                    $arResult[$order['@attributes']['Number']][$order_subfolder]['AddedService'] = $order['AddedService'];
+                    $arResult[$order['@attributes']['Number']][$order_subfolder]['DeliverySumTotal'] = $sum;
                 }
-                $arResult[$order['@attributes']['Number']]['DeliverySum'] = $order['@attributes']['DeliverySum'];
-                $arResult[$order['@attributes']['Number']]['AddedService'] = $order['AddedService'];
-                $arResult[$order['@attributes']['Number']]['DeliverySumTotal'] = $sum;
             }
         }
         return $arResult;

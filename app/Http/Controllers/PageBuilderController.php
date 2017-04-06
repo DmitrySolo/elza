@@ -92,14 +92,16 @@ class PageBuilderController extends Controller
 
         $returns=array();
         $rdsList=array();
+        $rdsArrays=array();
         $rdsCount = count($list['query']);
         foreach($list['query'] as $rds){
             $rdsList[]=$rds->number;
+            $rdsArrays[$rds->number][($rds->old)?'Old':'New']=['number'=>$rds->number,'id'=>$rds->id,'old'=>$rds->old];
         }
         //dd($rdsList);
         $DocsByCdek = array();
         if(count($rdsList)) {
-            $lInfo = $CDEKController->getListInfo($rdsList);//отправляем сдэку список из номеров рдс
+            $lInfo = $CDEKController->getListInfo($rdsArrays);//отправляем сдэку список из номеров рдс. Теперь по $rdsArrays!!!
             foreach ($lInfo as $key=>$value){
                 $DocsByCdek[] = $key;
             }
@@ -200,8 +202,9 @@ class PageBuilderController extends Controller
                     else{   $nocdekResultArr[$val->doc_number]['total_price']+=$val->price*$val->quantity;
                         $nocdekResultArr[$val->doc_number]['total_b_price']+=$val->base_price;
                     }
+                    //было за циклом
+                    $nocdekResultArr[$val->doc_number]['total']=$nocdekResultArr[$val->doc_number]['total_price']-$nocdekResultArr[$val->doc_number]['total_b_price']+$costDel;
                 }
-                $nocdekResultArr[$val->doc_number]['total']=$nocdekResultArr[$val->doc_number]['total_price']-$nocdekResultArr[$val->doc_number]['total_b_price']+$costDel;
             }
             //dd($nocdekResultArr);
             foreach ($list['query'] as &$rds) {

@@ -41,13 +41,8 @@ class Document extends Model
         return $this->rdc($number)->update(['track'=>$track]);
     }
 
-    /**
-     * GCR - Goods, Clients, Returns
-     * @param $numbers
-     * @return mixed
-     */
-    public function getWithGCRByMultiID($numbers){
-        return $res = $this->rdcmulti($numbers)->GoodsClientsReturns()->get();
+    public function getWithGCRByRDSID($rdsIDs){//todo
+        return $res = $this->rdcmulti($rdsIDs)->GoodsClientsReturns()->get();
     }
 
     public function import($arr){
