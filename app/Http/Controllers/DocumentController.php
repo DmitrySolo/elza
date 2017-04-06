@@ -15,6 +15,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\DocProduct;
 use App\Models\CSVDocument;
+use Mockery\Exception;
 
 class DocumentController extends Controller
 {
@@ -65,14 +66,14 @@ class DocumentController extends Controller
         $c=0;
         $docs=$document->getWithoutTrack();
         foreach ($docs as $doc) {
-            $track = $cdek->getDispatchNumber($doc->number);
+            $track = null;//$cdek->getDispatchNumber($doc->number);
             $document->setTrack($doc->number,$track);
             $doc_client = $document->getWithClient($doc->number);
             $mail = $doc_client->address;
             $name = $doc_client->name;
             $site = 'santehsmart.ru';
 
-            if(/*!empty($mail)&&!empty($track)*/false) {
+            if(/*!empty($mail)&&!empty($track)*/false) {//todo
                 $from_user = "=?UTF-8?B?" . base64_encode($site) . "?=";
                 $subject = "=?UTF-8?B?" . base64_encode('Ваш товар передан в транспортную компанию') . "?=";
 
@@ -155,24 +156,33 @@ class DocumentController extends Controller
 
         $doc_id=0;
         $doc_number='';
-        while($data=$CSVDocument->getLine()){
-            if(empty($data['product_code'])){
-                $doc_id=$document->import($data);
-                $doc_number=$data['document_number'];
-            }elseif($doc_number==$data['document_number']) {
-                $docProduct->import($data,$doc_id);
-                $ar_products[]=$data['product_code'];
-            }else echo "error $doc_number id=$doc_id<br>";
-            //if(++$i>10)break;
+        try {
+            while ($data = $CSVDocument->getLine()) {
+                if (empty($data['product_code'])) {
+                    $doc_id = $document->import($data);
+                    $doc_number = $data['document_number'];
+                } elseif ($doc_number == $data['document_number']) {
+                    $docProduct->import($data, $doc_id);
+                    $ar_products[$data['product_code']] = $data['product_code'];
+                } else echo "error $doc_number id=$doc_id with {$data['document_number']}<br>";
+                //if(++$i>10)break;
+            }
+        }catch (Exception $e){
+            echo 'error CSVDocument<br>';
+            $CSVDocument->close();
+            $p_info->updateByArray($ar_products);
+            return;
         }
+        $CSVDocument->close();
         $p_info->updateByArray($ar_products);
-        $this->updateTracks();
+        //$this->updateTracks();
         echo 'ok CSVDocument<br>';
 
         $CSVClient->open();
         while($data=$CSVClient->getLine()){
             $client->import($data);
         }
+        $CSVClient->close();
         echo 'ok CSVClient<br>';
 
         $CSVPnk->open();
@@ -185,6 +195,7 @@ class DocumentController extends Controller
             //if(++$i>10)break;
         }
         //$p_info->updateByArray($ar_products);
+        $CSVPnk->close();
         echo 'ok CSVPnk<br>';
     }
 
