@@ -16,6 +16,10 @@ class Document extends Model
         $res = $this->rdc($number)->first();
         return $res;
     }
+    public function getByID($id){
+        $res = $this->id($id)->first();
+        return $res;
+    }
     public function getWithOld($number,$old){
         $res = $this->rdc($number)->where('old',$old)->first();
         return $res;
@@ -31,10 +35,13 @@ class Document extends Model
         $res = $this->id($id)->client()->first();
         return $res;
     }
-    public function getWithClientAndGoodsByID($number){
+    public function getWithClientAndGoodsByNumber($number){
         return $res = $this->rdc($number)->GoodsAndClients()->get();
     }
-    public function getWithClientAndGoodsByMultiID($numbers){
+    public function getWithClientAndGoodsById($id){
+        return $res = $this->id($id)->GoodsAndClients()->get();
+    }
+    public function getWithClientAndGoodsByMultiNumber($numbers){
         return $res = $this->rdcmulti($numbers)->GoodsAndClients()->get();
     }
     public function getWithoutTrack(){

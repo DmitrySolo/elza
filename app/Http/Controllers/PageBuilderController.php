@@ -172,13 +172,6 @@ class PageBuilderController extends Controller
                     $lInfo[$resItem['number']][$order_subfolder]['flag'] = 1;
                 }
 
-
-
-
-
-
-
-
             }
             $nocdekResultArr = array();
             //dd($rdsIDs);

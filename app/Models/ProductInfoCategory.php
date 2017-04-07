@@ -33,7 +33,7 @@ class ProductInfoCategory extends Model
             DB::raw('min(doc_products.price) as min_price'),DB::raw('min(doc_products.quantity) as min_quantity')*/)
             ->join('product_infos', 'product_infos.category', 'LIKE', DB::raw( "CONCAT(product_info_categories.info_category, '%')" ))
             ->join('doc_products', 'product_infos.sku', '=', 'doc_products.sku')
-            ->join('documents', 'doc_products.doc_number', '=', 'documents.number')
+            ->join('documents', 'doc_products.doc_id', '=', 'documents.doc_id')
             /*->leftJoin('returns', 'doc_products.doc_number', '=', 'returns.docu_number')
             ->leftJoin('ret_products', function($join)
             {

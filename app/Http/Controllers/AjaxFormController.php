@@ -91,9 +91,10 @@ class AjaxFormController extends Controller
         return view('ajax.taskInfo',$taskInfoData);
     }
     public function getWithClientByID( Document $doc,CDEKController $cdek,Request $request){
-        $resCdek=$cdek->basicCDEK($request->rds);
+        $rds=$doc->getByID($request->doc_id);
+        if($rds)$resCdek=$cdek->basicCDEK($rds->number,intval($rds->old));
         //dd($resCdek);
-        if(isset($resCdek['ERROR_CDEK'])){
+        if(isset($resCdek['ERROR_CDEK'])||(!isset($resCdek))){
             $resCdek=[
                 "Number" => $request->rds,
                 "DispatchNumber" => "0",
@@ -108,7 +109,7 @@ class AjaxFormController extends Controller
                 "DeliverySum" => "0",
                 "AddedService" => [],
                 "DeliverySumTotal" => 0,
-                "ERROR_CDEK" => $resCdek['ERROR_CDEK']
+                "ERROR_CDEK" => isset($resCdek)?$resCdek['ERROR_CDEK']:'Накладная СДЭК не найдена.'
             ];
         }
         $package=array();
@@ -122,7 +123,7 @@ class AjaxFormController extends Controller
                 }
             }
         }
-        $res=$doc->getWithClientAndGoodsByID($request->rds);
+        $res=$doc->getWithClientAndGoodsById($request->doc_id);
             $goods=array();
             $client=array();
             $flag=0;
@@ -206,7 +207,7 @@ class AjaxFormController extends Controller
             'tariff' => '',
             'pvz' => ''
         ];
-        $res=$doc->getWithClientAndGoodsByID($request->rds);
+        $res=$doc->getWithClientAndGoodsByNumber($request->rds);
         foreach($res as $resItem){
             $input['name']=$resItem['name'];
             $input['email']=$resItem['address'];
