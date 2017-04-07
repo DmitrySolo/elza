@@ -7,14 +7,17 @@ use DB;
 
 class DocProduct extends Model
 {
-    public function getAll($number,$doc_id){
-        return $this->rdc($number,$doc_id)->get();
+    public function getAll($number){
+        return $this->rdc($number)->get();
     }
-    public function getAllWithRet($number,$doc_id){
-        return $this->rdc($number,$doc_id)->return()->get();
+    public function getAllWithRet($number){
+        return $this->rdc($number)->return()->get();
     }
-    public function get($number,$doc_id,$sku){
-        return $this->rdc($number,$doc_id)->product($sku)->first();
+    public function getAllWithRetByID($doc_id){
+        return $this->rdcid($doc_id)->return()->get();
+    }
+    public function get($number,$sku){
+        return $this->rdc($number)->product($sku)->first();
     }
 
     public function import($arr,$doc_id){
@@ -47,8 +50,11 @@ class DocProduct extends Model
         return $this->select('sku')->distinct('sku')->get();
     }
 
-    public function scopeRDC($query,$number,$doc_id){
-        $query->where('doc_products.doc_number','=',$number)->where('doc_products.doc_id','=',$doc_id);
+    public function scopeRDC($query,$number){
+        $query->where('doc_products.doc_number','=',$number);
+    }
+    public function scopeRDCID($query,$doc_id){
+        $query->where('doc_products.doc_id','=',$doc_id);
     }
 
     public function scopeProduct($query,$sku){
@@ -56,12 +62,16 @@ class DocProduct extends Model
     }
 
     public function scopeReturn($query){
-        $query->leftJoin('returns', 'doc_products.doc_number', '=', 'returns.docu_number')
-            ->leftJoin('ret_products', function($join)
+        $query->leftJoin('documents', 'doc_products.doc_id', '=', 'documents.doc_id')
+            ->leftJoin('returns', function($join)
+            {
+                $join->on('doc_products.doc_number', '=', 'returns.docu_number')
+                    ->on('documents.old', '=', 'returns.ret_old');
+            })->leftJoin('ret_products', function($join)
             {
                 $join->on('returns.ret_number', '=', 'ret_products.ret_number')
                     ->on('doc_products.sku', '=', 'ret_products.ret_sku');
             })
-            ->select('doc_products.*','returns.*','ret_products.*');
+        ->select('doc_products.*','returns.*','ret_products.*');
     }
 }

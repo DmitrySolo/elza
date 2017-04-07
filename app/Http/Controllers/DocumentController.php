@@ -67,21 +67,23 @@ class DocumentController extends Controller
         $docs=$document->getWithoutTrack();
         foreach ($docs as $doc) {
             $track = null;//$cdek->getDispatchNumber($doc->number);
-            $document->setTrack($doc->number,$track);
-            $doc_client = $document->getWithClient($doc->number);
-            $mail = $doc_client->address;
-            $name = $doc_client->name;
-            $site = 'santehsmart.ru';
+            $document->setTrack($doc->number, $track);
+            $doc_client = $document->getWithClientByID($doc->id);
+            if ($doc_client) {
+                $mail = $doc_client->address;
+                $name = $doc_client->name;
+                $site = 'santehsmart.ru';
 
-            if(/*!empty($mail)&&!empty($track)*/false) {//todo
-                $from_user = "=?UTF-8?B?" . base64_encode($site) . "?=";
-                $subject = "=?UTF-8?B?" . base64_encode('Ваш товар передан в транспортную компанию') . "?=";
+                if (/*!empty($mail)&&!empty($track)*/false) {//todo
+                    $from_user = "=?UTF-8?B?" . base64_encode($site) . "?=";
+                    $subject = "=?UTF-8?B?" . base64_encode('Ваш товар передан в транспортную компанию') . "?=";
 
-                $headers = "From: $from_user <sale@santehsmart.ru>\r\n" .
-                    "MIME-Version: 1.0" . "\r\n" .
-                    "Content-type: text/html; charset=UTF-8" . "\r\n";
+                    $headers = "From: $from_user <sale@santehsmart.ru>\r\n" .
+                        "MIME-Version: 1.0" . "\r\n" .
+                        "Content-type: text/html; charset=UTF-8" . "\r\n";
 
-                mail(/*'sergk393@inbox.ru'*/$mail, $subject, "
+                    mail(/*'sergk393@inbox.ru'*/
+                        $mail, $subject, "
 <!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">
 <html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"ru\" lang=\"ru\">
 <head>
@@ -132,9 +134,10 @@ class DocumentController extends Controller
 </table>
 </body>
 </html>", $headers);
-            }
+                }
 
-            $c++;
+                $c++;
+            }else echo "{$doc->number} {$doc->doc_id} not found<br>";
         }
 
         echo "Updated $c track(s)<br>";
@@ -162,8 +165,10 @@ class DocumentController extends Controller
                     $doc_id = $document->import($data);
                     $doc_number = $data['document_number'];
                 } elseif ($doc_number == $data['document_number']) {
-                    $docProduct->import($data, $doc_id);
-                    $ar_products[$data['product_code']] = $data['product_code'];
+                    if($doc_id) {
+                        $docProduct->import($data, $doc_id);
+                        $ar_products[$data['product_code']] = $data['product_code'];
+                    }else echo "$doc_number was added {$data['document_number']}<br>";
                 } else echo "error $doc_number id=$doc_id with {$data['document_number']}<br>";
                 //if(++$i>10)break;
             }
@@ -175,7 +180,6 @@ class DocumentController extends Controller
         }
         $CSVDocument->close();
         $p_info->updateByArray($ar_products);
-        //$this->updateTracks();
         echo 'ok CSVDocument<br>';
 
         $CSVClient->open();
@@ -183,6 +187,7 @@ class DocumentController extends Controller
             $client->import($data);
         }
         $CSVClient->close();
+        $this->updateTracks();
         echo 'ok CSVClient<br>';
 
         $CSVPnk->open();

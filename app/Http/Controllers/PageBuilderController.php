@@ -92,33 +92,36 @@ class PageBuilderController extends Controller
 
         $returns=array();
         $rdsList=array();
+        $rdsIDs=array();
         $rdsArrays=array();
         $rdsCount = count($list['query']);
         foreach($list['query'] as $rds){
             $rdsList[]=$rds->number;
-            $rdsArrays[$rds->number][($rds->old)?'Old':'New']=['number'=>$rds->number,'id'=>$rds->id,'old'=>$rds->old];
+            $rdsArrays[$rds->number][($rds->old)?'Old':'New']=['number'=>$rds->number,'doc_id'=>$rds->doc_id,'old'=>$rds->old];
+            $rdsIDs[]=$rds->doc_id;
         }
-        //dd($rdsList);
-        $DocsByCdek = array();
+        //dd($list['query']);
+        $DocsByCdekIDs = array();
         if(count($rdsList)) {
             $lInfo = $CDEKController->getListInfo($rdsArrays);//отправляем сдэку список из номеров рдс. Теперь по $rdsArrays!!!
-            foreach ($lInfo as $key=>$value){
-                $DocsByCdek[] = $key;
+            foreach ($lInfo as $key=>$ar_value){
+                foreach ($ar_value as $key_value=>$val_value){
+                    $DocsByCdekIDs[] = $rdsArrays[$key][$key_value]['doc_id'];
+                }
             }
-            //dd($DocsByCdek);
-            $ourShipingList = array_diff($rdsList,$DocsByCdek);
-            //dd($ourShipingList);
-            $goods = $RDS->getWithGCRByMultiID($rdsList);// получаем список товаров
+            $ourShipingList = array_diff($rdsIDs,$DocsByCdekIDs);
+            $goods = $RDS->getWithGcrByRdsID($rdsIDs);// получаем список товаров
             //dd($goods);
             //dd($lInfo);
             foreach ($goods as $resItem) {
                 //if(isset($resCdek['Package']) && !empty($resCdek['Package'])){}
                 //dd($resItem);
+                $order_subfolder=$resItem['old']?'Old':'New';
 
-                if (isset($lInfo[$resItem['number']])) {//Если через сдэк
+                if (isset($lInfo[$resItem['number']][$order_subfolder])) {//Если через сдэк
                     $package=array();
-                    if(isset($lInfo[$resItem['number']]['Package']) && !empty($lInfo[$resItem['number']]['Package'])){
-                        foreach ($lInfo[$resItem['number']]['Package'] as $itemq ){
+                    if(isset($lInfo[$resItem['number']][$order_subfolder]['Package']) && !empty($lInfo[$resItem['number']][$order_subfolder]['Package'])){
+                        foreach ($lInfo[$resItem['number']][$order_subfolder]['Package'] as $itemq ){
                             //dd($itemq);
                             if(isset($itemq['Item']['@attributes'])) {
                                 $key = $itemq['Item']['@attributes']['WareKey'];
@@ -135,38 +138,38 @@ class PageBuilderController extends Controller
                         $resItem['base_price']-=$resItem['ret_base_price'];
                     }
 
-                    if (!isset($lInfo[$resItem['number']]['flag'])) {
-                        $lInfo[$resItem['number']]['total_price'] = 0;
-                        $lInfo[$resItem['number']]['total_base_price'] = 0;
-                        $lInfo[$resItem['number']]['delivery_cost'] = 0;
+                    if (!isset($lInfo[$resItem['number']][$order_subfolder]['flag'])) {
+                        $lInfo[$resItem['number']][$order_subfolder]['total_price'] = 0;
+                        $lInfo[$resItem['number']][$order_subfolder]['total_base_price'] = 0;
+                        $lInfo[$resItem['number']][$order_subfolder]['delivery_cost'] = 0;
                     }
 
-                    if (!isset($lInfo[$resItem['number']]['DeliverySumTotal'])) $lInfo[$resItem['number']]['DeliverySumTotal'] = 400;
-                    $delSum = $lInfo[$resItem['number']]['DeliverySumTotal'];
-                    if ($lInfo[$resItem['number']]['Status']['Code'] == 5) {
+                    if (!isset($lInfo[$resItem['number']][$order_subfolder]['DeliverySumTotal'])) $lInfo[$resItem['number']][$order_subfolder]['DeliverySumTotal'] = 400;
+                    $delSum = $lInfo[$resItem['number']][$order_subfolder]['DeliverySumTotal'];
+                    if ($lInfo[$resItem['number']][$order_subfolder]['Status']['Code'] == 5) {
                         $vozvrat = 2;
-                        $lInfo[$resItem['number']]['total_price'] = 0;
-                        $lInfo[$resItem['number']]['total_base_price'] = 0;
-                        $lInfo[$resItem['number']]['delivery_cost'] = 0;
+                        $lInfo[$resItem['number']][$order_subfolder]['total_price'] = 0;
+                        $lInfo[$resItem['number']][$order_subfolder]['total_base_price'] = 0;
+                        $lInfo[$resItem['number']][$order_subfolder]['delivery_cost'] = 0;
                     } else {
                         $vozvrat = 1;
                         if ($resItem['sku'] == 106730) {
-                            $lInfo[$resItem['number']]['delivery_cost'] = $resItem['price'];
+                            $lInfo[$resItem['number']][$order_subfolder]['delivery_cost'] = $resItem['price'];
                             $costDel = $resItem['price'];
                         } else {
-                            $lInfo[$resItem['number']]['delivery_cost']=0;
-                            $lInfo[$resItem['number']]['real_quantity'] = (array_key_exists($resItem['sku'],$package))?$package[$resItem['sku']]:$resItem['quantity'];
-                            $lInfo[$resItem['number']]['total_price'] += $resItem['price'] * $lInfo[$resItem['number']]['real_quantity'];
-                            $lInfo[$resItem['number']]['total_base_price'] += $resItem['base_price']/* * $lInfo[$resItem['number']]['real_quantity']*/;
+                            $lInfo[$resItem['number']][$order_subfolder]['delivery_cost']=0;
+                            $lInfo[$resItem['number']][$order_subfolder]['real_quantity'] = (array_key_exists($resItem['sku'],$package))?$package[$resItem['sku']]:$resItem['quantity'];
+                            $lInfo[$resItem['number']][$order_subfolder]['total_price'] += $resItem['price'] * $lInfo[$resItem['number']][$order_subfolder]['real_quantity'];
+                            $lInfo[$resItem['number']][$order_subfolder]['total_base_price'] += $resItem['base_price']/* * $lInfo[$resItem['number']][$order_subfolder]['real_quantity']*/;
                         }
                     }
 
-                    $lInfo[$resItem['number']]['total'] = $lInfo[$resItem['number']]['total_price']
-                        - $lInfo[$resItem['number']]['total_base_price'] - $delSum
-                        + $lInfo[$resItem['number']]['delivery_cost'];
-                    $lInfo[$resItem['number']]['totalDel'] = $delSum;
+                    $lInfo[$resItem['number']][$order_subfolder]['total'] = $lInfo[$resItem['number']][$order_subfolder]['total_price']
+                        - $lInfo[$resItem['number']][$order_subfolder]['total_base_price'] - $delSum
+                        + $lInfo[$resItem['number']][$order_subfolder]['delivery_cost'];
+                    $lInfo[$resItem['number']][$order_subfolder]['totalDel'] = $delSum;
 
-                    $lInfo[$resItem['number']]['flag'] = 1;
+                    $lInfo[$resItem['number']][$order_subfolder]['flag'] = 1;
                 }
 
 
@@ -178,10 +181,10 @@ class PageBuilderController extends Controller
 
             }
             $nocdekResultArr = array();
-            foreach ($ourShipingList as $key => $doc){//////////////////////IF NO CDEK!!!!
-                $products = $product->getAllWithRet($doc);// С ВОЗВРАТАМИ
-                //print_r($products);
-                //dd([$doc,$products]);
+            //dd($rdsIDs);
+            foreach ($ourShipingList as $key => $doc_id){//////////////////////IF NO CDEK!!!!
+                $products = $product->getAllWithRetByID($doc_id);// С ВОЗВРАТАМИ
+                //dd([$doc_id,$products]);
 
                 foreach($products as $item =>$val) {
                     if(!empty($val->ret_sku)){//если товар возвратный, то убираем прибыль
@@ -209,19 +212,20 @@ class PageBuilderController extends Controller
             //dd($nocdekResultArr);
             foreach ($list['query'] as &$rds) {
                 // dd($list['query']);
-                if (isset($lInfo[$rds->number])) {
-                    $rds->total = $lInfo[$rds->number]['total'];
-                    $rds->total_d = $lInfo[$rds->number]['total_price']+$costDel;
-                    $rds->totalDelSrvcs = $lInfo[$rds->number]['totalDel'];
-                    $rds->status_code = (isset($returns[$rds->number]))?81:$lInfo[$rds->number]['Status']['Code'];
-                    $rds->status_desc=$lInfo[$rds->number]['Status']['Description'];
-                    $rds->reason=$lInfo[$rds->number]['Reason']['Description'];
+                $order_subfolder=$rds->old?'Old':'New';
+                if (isset($lInfo[$rds->number][$order_subfolder])) {
+                    $rds->total = $lInfo[$rds->number][$order_subfolder]['total'];
+                    $rds->total_d = $lInfo[$rds->number][$order_subfolder]['total_price']+$costDel;
+                    $rds->totalDelSrvcs = $lInfo[$rds->number][$order_subfolder]['totalDel'];
+                    $rds->status_code = (isset($returns[$rds->number]))?81:$lInfo[$rds->number][$order_subfolder]['Status']['Code'];
+                    $rds->status_desc=$lInfo[$rds->number][$order_subfolder]['Status']['Description'];
+                    $rds->reason=$lInfo[$rds->number][$order_subfolder]['Reason']['Description'];
                     $footerData['total_price']+=$rds->total_d;
                     if($rds->status_code==4 || $rds->status_code==5){
                         $footerData['endTotal']+=$rds->total;
                         $footerData['deliveryServicesCostTotal']+=$rds->totalDelSrvcs;
                         if($rds->status_code==4)$footerData['st4']++;
-                        else {$footerData['st5']++;  $lInfo[$rds->number];
+                        else {$footerData['st5']++;  //$lInfo[$rds->number][$order_subfolder];
                             if(isset($footerData['reason'][$rds->reason]))  $footerData['reason'][$rds->reason]++;
                             else{$footerData['reason'][$rds->reason]=1;}
                         }

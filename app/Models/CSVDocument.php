@@ -25,6 +25,7 @@ class CSVDocument extends Model{
         foreach($this->head as $num=>$key){
             $arResult[$key]=$arr[$num];
         }
+
         $arResult['document_old']=true;
         if(isset($arResult['document_date'])){
             if(intval(substr($arResult['document_date'],0,4))>=2017)$arResult['document_old']=false;
@@ -33,6 +34,8 @@ class CSVDocument extends Model{
     }
 
     public function close(){
-        fclose($this->file);
+        try {
+            fclose($this->file);
+        }catch (\Exception $e){}
     }
 }
