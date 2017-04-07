@@ -104,12 +104,13 @@ $(document).ready(function(){
 $(document).on('click','.RDSmodal',
     function(){
         $( "#RDSContent" ).html('');
+        var doc_id=$(this).data('doc_id');
         var rds=$(this).data('rds');
-        console.log(rds);
+        console.log(doc_id);
         $.ajax({
             method: "POST",
             url: "/ajax/getfortask",
-            data: { rds: rds }
+            data: { doc_id: doc_id,rds: rds }
         })
         .done(function( html ) {
             $( "#RDSContent" ).html(html);
@@ -324,12 +325,12 @@ $(document).on('change','.cdek-form .cdek-city-select',
 );
 $(document).on('click','.newCDEKmodal',
     function(){
-        var rds=$(this).data('rds');
-        console.log(rds);
+        var doc_id=$(this).data('doc_id');
+        console.log(doc_id);
         $.ajax({
             method: "POST",
             url: "/ajax/addcdek",
-            data: { rds: rds }
+            data: { doc_id: doc_id }
         })
         .done(function( html ) {
             $( "#newCDEKContent" ).html(html);
@@ -337,7 +338,7 @@ $(document).on('click','.newCDEKmodal',
             $.ajax({
                 method: "POST",
                 url: "/ajax/newcdekbitrixinfo",
-                data: { rds: rds }
+                data: { doc_id: doc_id }
             })
                 .done(function( html ) {
                     $( ".cdek-form .cdek-add-info" ).html(html);

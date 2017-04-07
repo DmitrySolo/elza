@@ -56,7 +56,7 @@ class Client extends Model
             DB::raw('sum(ret_products.ret_quantity) as sum_ret_quantity'),
             DB::raw('sum((ret_products.ret_price*ret_products.ret_quantity)-ret_products.ret_base_price) as ret_profit')*/)
             ->join('documents', 'clients.id', '=', 'documents.client_id')
-            ->join('doc_products', 'documents.number', '=', 'doc_products.doc_number')
+            ->join('doc_products', 'documents.doc_id', '=', 'doc_products.doc_id')
             /*->leftJoin('returns', 'doc_products.doc_number', '=', 'returns.docu_number')
             ->leftJoin('ret_products', function($join)
             {

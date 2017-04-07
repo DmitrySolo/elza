@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -115,7 +116,7 @@ class CDEKController extends Controller
             foreach ($report['Order'] as $order) {
                 if (isset($order['@attributes']['Number'])) {
                     $order_subfolder = 'Old';
-                    $order_year=intval(substr($order['@attributes']['DeliveryDate'],0,4));
+                    $order_year=intval(substr($order['Status']['@attributes']['Date'],0,4));
                     if($order_year>=2017) $order_subfolder = 'New';
 
                     if(isset($arOrders[$order['@attributes']['Number']][$order_subfolder])) {
@@ -269,7 +270,7 @@ class CDEKController extends Controller
         }
     }
 
-    public function basicCDEK($number){
+    public function basicCDEK($number,$old){
         $arResult=['Number'=>$number];
         $arReport=array(
             array(
@@ -286,32 +287,41 @@ class CDEKController extends Controller
             $arr['ERROR_CDEK']="Накладная СДЭК $number не найдена: ".$report['@attributes']['ErrorCode'];
             return $arr;
         }
-        $order=$report['Order'];
-        if(!isset($order['@attributes'])){
-            $order=end($order);
+        $orders=$report['Order'];
+        if(isset($orders['@attributes'])){
+            $orders=[$orders];
         }
-        $arResult['DispatchNumber']=$order['@attributes']['DispatchNumber'];
-        $arResult['Status']=$order['Status']['@attributes'];
-        $arResult['Reason']=$order['Reason']['@attributes'];
-        if(isset($order['Package'])){
-            $arResult['Package']=$order['Package'];
-        }
+        foreach ($orders as $order) {
+            $order_old = 1;
+            $order_year=intval(substr($order['Status']['@attributes']['Date'],0,4));
+            if($order_year>=2017) $order_old = 0;
 
-        $arInfo=array(
-            array(
-                'OBJECT'=>'Order',
-                'ATTRIBUTES'=>['DispatchNumber'=>$arResult['DispatchNumber']]
-            )
-        );
-        $info=$this->_getCDEK($this->_info_report($arInfo));
-        $sum=intval($info['Order']['@attributes']['DeliverySum']);
-        foreach($info['Order']['AddedService'] as $service){
-            $sum+=intval($service['@attributes']['Sum']);
+            if($order_old == $old) {
+                $arResult['DispatchNumber'] = $order['@attributes']['DispatchNumber'];
+                $arResult['Status'] = $order['Status']['@attributes'];
+                $arResult['Reason'] = $order['Reason']['@attributes'];
+                if (isset($order['Package'])) {
+                    $arResult['Package'] = $order['Package'];
+                }
+
+                $arInfo = array(
+                    array(
+                        'OBJECT' => 'Order',
+                        'ATTRIBUTES' => ['DispatchNumber' => $arResult['DispatchNumber']]
+                    )
+                );
+                $info = $this->_getCDEK($this->_info_report($arInfo));
+                $sum = intval($info['Order']['@attributes']['DeliverySum']);
+                foreach ($info['Order']['AddedService'] as $service) {
+                    $sum += intval($service['@attributes']['Sum']);
+                }
+                $arResult['DeliverySum'] = $info['Order']['@attributes']['DeliverySum'];
+                $arResult['AddedService'] = $info['Order']['AddedService'];
+                $arResult['DeliverySumTotal'] = $sum;
+            }
         }
-        $arResult['DeliverySum']=$info['Order']['@attributes']['DeliverySum'];
-        $arResult['AddedService']=$info['Order']['AddedService'];
-        $arResult['DeliverySumTotal']=$sum;
-        //return $arResult;
+        //todo если не найдено
+        //dd($arResult);
         return $arResult;
     }
     public function orderPrint($number){
