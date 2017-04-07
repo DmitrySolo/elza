@@ -31,6 +31,7 @@ class Returns extends Model
             [
                 "ret_number" =>$arr['document_number'],
                 "docu_number" =>$arr['docu_number'],
+                "ret_old"=>$arr['document_old'],
                 "ret_date"=>$arr['document_date'],
                 "ret_desc"=>$arr['document_description'],
                 "ret_author"=>$arr['document_author'],

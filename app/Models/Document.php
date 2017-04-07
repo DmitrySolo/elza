@@ -27,6 +27,10 @@ class Document extends Model
         $res = $this->rdc($number)->client()->first();
         return $res;
     }
+    public function getWithClientByID($id){
+        $res = $this->id($id)->client()->first();
+        return $res;
+    }
     public function getWithClientAndGoodsByID($number){
         return $res = $this->rdc($number)->GoodsAndClients()->get();
     }
@@ -41,8 +45,8 @@ class Document extends Model
         return $this->rdc($number)->update(['track'=>$track]);
     }
 
-    public function getWithGCRByRDSID($rdsIDs){//todo
-        return $res = $this->rdcmulti($rdsIDs)->GoodsClientsReturns()->get();
+    public function getWithGcrByRdsID($rdsIDs){
+        return $res = $this->rdcmultiid($rdsIDs)->GoodsClientsReturns()->get();
     }
 
     public function import($arr){
@@ -61,22 +65,28 @@ class Document extends Model
     }
 
     public function scopeRDC($query,$number){
-        $query->where('number','=',$number);
+        $query->where('documents.number','=',$number);
+    }
+    public function scopeID($query,$id){
+        $query->where('documents.doc_id','=',$id);
     }
     public function scopeRDCMulti($query,$numbers){
-        $query->whereIn('number', $numbers);
+        $query->whereIn('documents.number', $numbers);
+    }
+    public function scopeRDCMultiID($query,$ids){
+        $query->whereIn('documents.doc_id', $ids);
     }
     public function scopeClient($query){
         $query->join('clients', 'documents.client_id', '=', 'clients.id')
             ->select('documents.*', 'clients.name', 'clients.address', 'clients.phone', 'clients.city');
     }
     public function scopeGoodsAndClients($query){
-        $query->join('doc_products', 'documents.number', '=', 'doc_products.doc_number')
+        $query->join('doc_products', 'documents.doc_id', '=', 'doc_products.doc_id')
             ->join('clients', 'documents.client_id', '=', 'clients.id')
             ->select('documents.*', 'clients.name', 'clients.address','clients.city', 'clients.phone','doc_products.*');
     }
     public function scopeGoodsClientsReturns($query){
-        $query->join('doc_products', 'documents.number', '=', 'doc_products.doc_number')
+        $query->join('doc_products', 'documents.doc_id', '=', 'doc_products.doc_id')
             ->leftJoin('returns', 'doc_products.doc_number', '=', 'returns.docu_number')
             ->leftJoin('ret_products', function($join)
             {

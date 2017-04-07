@@ -29,6 +29,8 @@ class CSVClient extends Model{
     }
 
     public function close(){
-        fclose($this->file);
+        try {
+            fclose($this->file);
+        }catch (\Exception $e){}
     }
 }

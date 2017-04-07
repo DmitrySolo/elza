@@ -123,7 +123,7 @@ class CDEKController extends Controller
                             'Number' => $order['@attributes']['Number'],
                             'Status' => $order['Status']['@attributes'],
                             'Reason' => $order['Reason']['@attributes'],
-                            'Old' => true
+                            'Old' => ($order_subfolder=='Old')?true:false
                         );
                         if (isset($order['Package'])) {
                             $arResult[$order['@attributes']['Number']][$order_subfolder]['Package'] = $order['Package'];

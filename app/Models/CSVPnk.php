@@ -26,6 +26,12 @@ class CSVPnk extends Model{
             $arResult[$key]=$arr[$num];
         }
 
+
+        $arResult['document_old']=true;
+        if(isset($arResult['document_date'])){
+            if(intval(substr($arResult['document_date'],0,4))>=2017)$arResult['document_old']=false;
+        }
+
         preg_match('/РД.+-[0-9]+/',mb_strtoupper($arResult['document_description']),$matches);
         //dd($matches);
         $arResult['docu_number']=isset($matches[0])?$matches[0]:'';
@@ -52,6 +58,8 @@ class CSVPnk extends Model{
     }
 
     public function close(){
-        fclose($this->file);
+        try {
+            fclose($this->file);
+        }catch (\Exception $e){}
     }
 }
