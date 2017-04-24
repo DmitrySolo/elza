@@ -163,18 +163,19 @@ class ProductInfoController extends Controller
                     );
                     $filter['data'] = array('city' => $item->city);
                     $list = $RDS->getList(1, $filter);
-                    $rdsList = array();
+                    $rdsArrays = array();
                     foreach ($list['query'] as $rds) {
-                        $rdsList[] = $rds->number;
+                        $rdsArrays[$rds->number][($rds->old)?'Old':'New']=['number'=>$rds->number,'doc_id'=>$rds->doc_id,'old'=>$rds->old];
                     }
-                    $lInfo = $cdek->getListInfo($rdsList);
+                    $lInfo = $cdek->getListInfo($rdsArrays);
                     foreach ($list['query'] as $rds) {
-                        if (isset($lInfo[$rds->number])) {
-                            if (!isset($lInfo[$rds->number]['DeliverySumTotal'])) $lInfo[$rds->number]['DeliverySumTotal'] = 400;
-                            $rds->status_code = $lInfo[$rds->number]['Status']['Code'];
+                        $order_subfolder=$rds->old?'Old':'New';
+                        if (isset($lInfo[$rds->number][$order_subfolder])) {
+                            if (!isset($lInfo[$rds->number][$order_subfolder]['DeliverySumTotal'])) $lInfo[$rds->number][$order_subfolder]['DeliverySumTotal'] = 400;
+                            $rds->status_code = $lInfo[$rds->number][$order_subfolder]['Status']['Code'];
                             if ($rds->status_code == 4 || $rds->status_code == 5) {
-                                $cityItem['deliveryServicesCostTotal'] += $lInfo[$rds->number]['DeliverySumTotal'];
-                                foreach($lInfo[$rds->number]['AddedService'] as $service){
+                                $cityItem['deliveryServicesCostTotal'] += $lInfo[$rds->number][$order_subfolder]['DeliverySumTotal'];
+                                foreach($lInfo[$rds->number][$order_subfolder]['AddedService'] as $service){
                                     $cityItem['deliveryServicesCostTotal'] += $service['@attributes']['Sum'];
                                 }
                             }
