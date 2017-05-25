@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ARResult extends Model
+class ArResult extends Model
 {
     public function get($id){
         $res = $this->result($id)->latest()->first();

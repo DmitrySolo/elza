@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ARVendor extends Model
+class ArVendor extends Model
 {
     public function get($id){
         $res = $this->vendor($id)->first();

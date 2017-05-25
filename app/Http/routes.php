@@ -66,7 +66,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/settask','WelcomeController@setTask');
     Route::get('/rdsdel','RDSController@updateRDSdelivery');
     Route::get('/rv','TaskController@reviewTasks');
-    Route::get('/test','ProductInfoController@updateProducts');
+    Route::get('/test','AngryRacoonController@test');
     Route::get('/search_rating','PageBuilderController@searchRating');
     Route::post('/ajax/searchSteps','SearchStatsController@getSearchSteps');
     Route::post('/ajax/runSearchStep','SearchStatsController@runSearchStep');

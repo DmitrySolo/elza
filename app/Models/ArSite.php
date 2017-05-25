@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ARSite extends Model
+class ArSite extends Model
 {
     public function get($id){
         $res = $this->site($id)->first();

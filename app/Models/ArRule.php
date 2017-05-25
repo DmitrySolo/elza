@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ARRule extends Model
+class ArRule extends Model
 {
     public function get($id){
         $res = $this->rule($id)->first();

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ARPage extends Model
+class ArPage extends Model
 {
     public function get($id){
         $res = $this->page($id)->first();
@@ -14,14 +14,14 @@ class ARPage extends Model
         return $this->insertGetId(
             [
                 "site_id"=>$arr['site_id'],
-                "page_http" =>$arr['page_http'],
+                "page_url" =>$arr['page_url'],
                 "rule_id"=>$arr['rule_id']
             ]
         );
     }
 
-    public function updateHTTP($id,$http){
-        return $this->site($id)->update(['page_http'=>$http]);
+    public function updateURL($id,$url){
+        return $this->site($id)->update(['page_url'=>$url]);
     }
 
     public function scopePage($query,$id){
