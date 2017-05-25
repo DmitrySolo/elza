@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ArPage;
+use App\Models\ArResult;
 use App\Models\ArRule;
 use App\Models\ArSite;
 use App\Models\ArVendor;
@@ -16,7 +18,7 @@ class AngryRacoonController extends Controller
     static $get=array();
 
     public function test(){
-        dd($this->ruleAdd(4,132,1234));
+        $this->getResultsByVendor(1);
     }
 
     public function parse($url,$classes){
@@ -49,8 +51,8 @@ class AngryRacoonController extends Controller
     }
 
     public function siteAdd($city,$name,$classes){
-        $ar_sites = new ArSite;
-        return $ar_sites->add(array(
+        $db_ar_sites = new ArSite();
+        return $db_ar_sites->add(array(
             'site_city' => $city,
             'site_name' => $name,
             'site_classes' => json_encode($classes)
@@ -58,8 +60,8 @@ class AngryRacoonController extends Controller
     }
 
     public function vendorAdd($name,$mail,$check=false){
-        $ar_vendors = new ArVendor();
-        return $ar_vendors->add(array(
+        $db_ar_vendors = new ArVendor();
+        return $db_ar_vendors->add(array(
             'vendor_name' => $name,
             'vendor_mail' => $mail,
             'vendor_check' => $check
@@ -67,17 +69,72 @@ class AngryRacoonController extends Controller
     }
 
     public function ruleAdd($vendor_id,$correct,$sku){
-        $ar_rules = new ArRule();
-        $ar_vendors = new ArVendor();
-        if($ar_vendors->get($vendor_id))
-        return $ar_rules->add(array(
+        $db_ar_rules = new ArRule();
+        $db_ar_vendors = new ArVendor();
+
+        if($db_ar_vendors->get($vendor_id))
+        return $db_ar_rules->add(array(
             'vendor_id' => $vendor_id,
             'rule_correct' => $correct,
             'rule_sku' => $sku
         ));
-        else return 'errrrrrorrrr!!!';
+        else return 0;
     }
 
+    public function pageAdd($site_id,$url,$rule_id){
+        $db_ar_pages = new ArPage();
+        $db_ar_sites = new ArSite();
+        $db_ar_rules = new ArRule();
+
+        if($db_ar_sites->get($site_id)&&$db_ar_rules->get($rule_id))
+            return $db_ar_pages->add(array(
+                'site_id' => $site_id,
+                'page_url' => $url,
+                'rule_id' => $rule_id
+            ));
+        else return 0;
+    }
+
+    public function resultAdd($page_id,$code){
+        $db_ar_results = new ArResult();
+        $db_ar_pages = new ArPage();
+
+        if($db_ar_pages->get($page_id))
+            return $db_ar_results->add(array(
+                'page_id' => $page_id,
+                'result_code' => $code
+            ));
+        else return 0;
+    }
+
+    public function getResultsByVendor($vendor_id){
+        $results = array();
+        $db_ar_rules = new ArRule();
+        $db_ar_pages = new ArPage();
+        $db_ar_sites = new ArSite();
+        $rules = $db_ar_rules->getByVendor($vendor_id);
+        foreach ($rules as $rule) {
+            $pages = $db_ar_pages->getByRule($rule->rule_id);
+            foreach ($pages as $page) {
+                $result_code = 1;
+                $site = $db_ar_sites->get($page->site_id);
+                $classes = json_decode($site->site_classes,true);
+
+                $parse_data = $this->parse($page->page_url,$classes);
+                if($parse_data) {
+                    if (isset($parse_data['price'])) {
+                        if(is_numeric($parse_data['price'])) {
+                            if($parse_data['price'] == $rule->rule_correct) $result_code = 0;
+                        }else $result_code = 4;
+                    }else $result_code = 4;
+                }elseif($parse_data == -1) $result_code = 3;
+                else $result_code = 2;
+
+                $results[] = array($page->page_id,$result_code);
+            }
+        }
+        dd($results);
+    }
 
     /**
      * @param $text

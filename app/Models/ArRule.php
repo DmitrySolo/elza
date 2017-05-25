@@ -25,6 +25,10 @@ class ArRule extends Model
         $res = $this->rulesku($sku)->first();
         return $res;
     }
+    public function getByVendor($vendor_id){
+        $res = $this->vendor($vendor_id)->get();
+        return $res;
+    }
     public function updateCorrect($id,$correct){
         return $this->rule($id)->update(['rule_correct'=>$correct]);
     }
@@ -32,10 +36,14 @@ class ArRule extends Model
         return $this->rulesku($sku)->update(['rule_correct'=>$correct]);
     }
 
+
     public function scopeRule($query,$id){
         $query->where('ar_rules.rule_id','=',$id);
     }
     public function scopeRuleSku($query,$sku){
         $query->where('ar_rules.rule_sku','=',$sku);
+    }
+    public function scopeVendor($query,$id){
+        $query->where('ar_rules.vendor_id','=',$id);
     }
 }

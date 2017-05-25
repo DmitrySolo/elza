@@ -20,11 +20,18 @@ class ArPage extends Model
         );
     }
 
+    public function getByRule($rule_id){
+        $res = $this->rule($rule_id)->get();
+        return $res;
+    }
     public function updateURL($id,$url){
         return $this->site($id)->update(['page_url'=>$url]);
     }
 
     public function scopePage($query,$id){
         $query->where('ar_pages.page_id','=',$id);
+    }
+    public function scopeRule($query,$id){
+        $query->where('ar_pages.rule_id','=',$id);
     }
 }
