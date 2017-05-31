@@ -10,6 +10,10 @@ class ArRule extends Model
         $res = $this->rule($id)->first();
         return $res;
     }
+    public function getAll(){
+        $res = $this->get();
+        return $res;
+    }
     public function add($arr){
         return $this->insertGetId(
             [

@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ArPage;
+use App\Models\ArResult;
+use App\Models\ArRule;
+use App\Models\ArSite;
+use App\Models\ArVendor;
 use App\Models\CdekCity;
 use App\Models\Client;
 use App\Models\ProductInfo;
@@ -255,6 +260,10 @@ class PageBuilderController extends Controller
             ->nest('footer', 'child.footer',['rds'=>$footerData])
             ->nest('leftsidebar', 'child.leftsidebar',$leftsidebarData)
             ->nest('rightsidebar', 'child.rightsidebar',$rightsidebarData);
+    }
+
+    public function angryRacoon(Request $request, AngryRacoonController $racoonController){
+
     }
 
     public function searchManager(Request $request,SearchStatsController $search){

@@ -10,6 +10,10 @@ class ArVendor extends Model
         $res = $this->vendor($id)->first();
         return $res;
     }
+    public function getAll(){
+        $res = $this->get();
+        return $res;
+    }
     public function add($arr){
         return $this->insertGetId(
             [

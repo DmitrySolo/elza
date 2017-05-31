@@ -133,11 +133,79 @@ class AngryRacoonController extends Controller
                 $results[] = array($page->page_id,$result_code);
             }
         }
-        dd($results);
+        return $results;
+    }
+
+    public function scanByVendors(){
+        $db_ar_results = new ArResult();
+        $db_ar_vendors = new ArVendor();
+        $res_ar_vendors = $db_ar_vendors->getAll();
+        foreach ($res_ar_vendors as $res_vendor) {
+            $results = $this->getResultsByVendor($res_vendor->vendor_id);
+            foreach ($results as list($page_id, $result_code)) {
+                $db_ar_results->add([
+                    "page_id"=>$page_id,
+                    "result_code" =>$result_code
+                ]);
+            }
+        }
+    }
+
+    public function getDataForUser(){
+        $db_ar_sites = new ArSite();
+        $db_ar_vendors = new ArVendor();
+        $db_ar_pages = new ArPage();
+        $db_ar_rules = new ArRule();
+        $db_ar_results = new ArResult();
+
+        $arResult = array();
+
+        $arSites = array();
+        $res_ar_sites = $db_ar_sites->getAll();
+        foreach ($res_ar_sites as $res_site) {
+            $arSites[] = array(
+                'city' => $res_site->site_city,
+                'name' => $res_site->site_name
+            );
+        }
+        $arResult['sites'] = $arSites;
+
+        $arVendors = array();
+        $res_ar_vendors = $db_ar_vendors->getAll();
+        foreach ($res_ar_vendors as $res_vendor) {
+            $arVendors[] = array(
+                'name' => $res_vendor->vendor_name,
+                'mail' => $res_vendor->vendor_mail,
+                'check' => $res_vendor->vendor_check
+            );
+        }
+        $arResult['vendors'] = $arVendors;
+
+        $arPages = array();
+        $res_ar_pages = $db_ar_pages->getAll();
+        foreach ($res_ar_pages as $res_page) {
+            $arPages[] = array(
+                'url' => $res_page->page_url
+            );
+        }
+        $arResult['pages'] = $arPages;
+
+        $arRules = array();
+        $res_ar_rules = $db_ar_rules->getAll();
+        foreach ($res_ar_rules as $res_rule) {
+            $arRules[] = array(
+                'correct' => $res_rule->rule_name,
+                'sku' => $res_rule->rule_mail
+            );
+        }
+        $arResult['rules'] = $arRules;
+
+        $arResults = array();
+        $res_ar_results = $db_ar_results->getAllLatest();//todo
     }
 
     /**
-     * @param $text
+     * @param $url
      * @return Crawler
      */
     private function _get_crawler($url){
@@ -160,5 +228,18 @@ class AngryRacoonController extends Controller
         curl_close($ch);
         $data = ($out==false)?new Crawler():new Crawler($out);
         return $data;
+    }
+
+    /**
+     * функция для создания скрина
+     * @var $url string - адрес сайта
+     * @var $screen string - размер экрана, может принимать только ширину. И может принимать ширину и высоту - 1024x768
+     * @var $size integer - ширина масштабированной картинки
+     * @var $format string - может принимать два значения (JPEG|PNG), по умолчанию "JPEG"
+     */
+    private function getScreenShot($url, $screen, $size, $format = "jpeg"){
+        $result = "http://mini.s-shot.ru/".$screen."/".$size."/".$format."/?".$url; // делаем запрос к сайту, который делает скрины
+        $pic = file_get_contents($result); // получаем данные. Ответ от сайта
+        file_put_contents("screen.".$format, $pic); // сохраняем полученную картинку
     }
 }

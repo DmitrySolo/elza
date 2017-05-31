@@ -10,6 +10,10 @@ class ArSite extends Model
         $res = $this->site($id)->first();
         return $res;
     }
+    public function getAll(){
+        $res = $this->get();
+        return $res;
+    }
     public function add($arr){
         return $this->insertGetId(
             [
